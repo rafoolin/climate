@@ -1,4 +1,4 @@
-import 'package:climate/pages/pages.dart';
+import 'package:climate/src/pages/pages.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
