@@ -15,7 +15,7 @@ This project is very simple and I did my best to add comments for almost every s
 
 ## Development Cycles
 
-- [ ] Models
+- [x] Models
 - [ ] API
 - [ ] Database support
 - [ ] Shared Preference
