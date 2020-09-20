@@ -10,14 +10,14 @@ This project is very simple and I did my best to add comments for almost every s
 
 ## To-Do
 
-- [ ] Support offline forecast.
+- [x] Support offline forecast.
 - [ ] Dark/Light Theme.
 
 ## Development Cycles
 
 - [x] Models
-- [ ] API
-- [ ] Database support
+- [x] API
+- [x] Database support
 - [ ] Shared Preference
 - [ ] bloc support
 - [ ] Setting page
