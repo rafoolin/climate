@@ -26,7 +26,10 @@ dependencies:
   intl: # ^0.16.1
   http: # ^0.12.2
   sembast: # ^2.4.7+7
-  path_provider: #  ^1.6.18  
+  path_provider: #  ^1.6.18
+  rxdart: # ^0.24.1
+  shared_preferences: # ^0.5.12
+
 
 dev_dependencies:
   flutter_test:

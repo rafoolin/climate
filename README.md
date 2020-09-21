@@ -18,8 +18,8 @@ This project is very simple and I did my best to add comments for almost every s
 - [x] Models
 - [x] API
 - [x] Database support
-- [ ] Shared Preference
-- [ ] bloc support
+- [x] Shared Preference
+- [x] bloc support
 - [ ] Setting page
 
 # Build
