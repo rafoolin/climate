@@ -38,9 +38,9 @@ class LocationClimate extends Object {
       json['consolidated_weather'].forEach(
         (forecast) {
           ConsolidatedWeather weather = ConsolidatedWeather.fromJson(forecast);
-          if (weather.applicableDate.isAfter(today) ||
-              (weather.applicableDate.isAtSameMomentAs(today)))
-            consolidatedWeather.add(weather);
+          // if (weather.applicableDate.isAfter(today) ||
+          //     (weather.applicableDate.isAtSameMomentAs(today)))
+          consolidatedWeather.add(weather);
         },
       );
     }
@@ -52,11 +52,11 @@ class LocationClimate extends Object {
         // Data comes from API and doesn't have "time_str" key
         json['time'];
 
-    time = DateTime.parse(json['time']);
+    time = DateTime.parse(json['time']).toUtc();
     // Config Offset
     _offsetConfig();
-    sunRise = DateTime.parse(json['sun_rise']);
-    sunSet = DateTime.parse(json['sun_set']);
+    sunRise = DateTime.parse(json['sun_rise']).toUtc().toUtc();
+    sunSet = DateTime.parse(json['sun_set']).toUtc().toUtc();
     timezoneName = json['timezone_name'];
     parent = json['parent'] != null ? Parent.fromJson(json['parent']) : null;
     if (json['sources'] != null) {

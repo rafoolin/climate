@@ -7,6 +7,7 @@ import 'package:climate/src/exceptions/exceptions.dart';
 import 'package:climate/src/models/models.dart';
 import 'package:climate/src/repository/repositories.dart';
 import 'package:climate/src/utils/utils.dart';
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ForecastBloc extends Bloc {
@@ -14,6 +15,7 @@ class ForecastBloc extends Bloc {
   final PreferencesBloc preferencesBloc;
   final _locations = BehaviorSubject<Map<String, bool>>();
   final _forecast = BehaviorSubject<LocationClimate>();
+  final _forecastColor = BehaviorSubject<Color>();
   // All cached places
   Map _cachePlaces = HashMap<String, bool>();
   // search result
@@ -114,8 +116,15 @@ class ForecastBloc extends Bloc {
             // Fetch Weather/Climate information [either API or database]
             await _repository.location(woeid: locations.first.woeid))
         // Add climate to stream
-        .then((climate) async => _forecast.add(climate))
-        .catchError((onError) async => _forecast.addError(onError));
+        .then((climate) {
+      // Add color when a climate is fetched
+      _catchForecastColor(climate: climate);
+      return _forecast.add(climate);
+    }).catchError((onError) async {
+      // When there is an error add default color to stream
+      _forecastColor.add(CustomColor.defaultColor);
+      return _forecast.addError(onError);
+    });
   }
 
   // ================================================================================
@@ -138,28 +147,30 @@ class ForecastBloc extends Bloc {
           onErrorReturn('UTC');
 
   // ================================================================================
-  // =                                 ForecastColor                                =
+  // =                               ForecastColor                                  =
   // ================================================================================
   /// Climate color condition stream
-  get climateColorStream => forecastStream.map((forecast) {
-        DateTime now = DateTime.now();
-        // Today without  hours, minutes and seconds
-        DateTime today = DateTime(now.year, now.month, now.day);
-        // From 6 forecast get the [today] one.
-        ConsolidatedWeather todayForecast = forecast.consolidatedWeather
-            .firstWhere(
-                (forecast) => forecast.applicableDate.isAtSameMomentAs(today));
-        // Return color based on weather status
-        return CustomColor.weatherStateColor(
-          weatherStateAbbr: todayForecast.weatherStateAbbr,
-        );
-      }).
-          // Return default color if [forecast] has faced any error
-          onErrorReturn((CustomColor.defaultColor));
+  get climateColorStream => _forecastColor.stream;
+
+  void _catchForecastColor({LocationClimate climate}) async {
+    //  Time in location timezone
+    DateTime now = DateTime.now().toUtc().add(climate.offset);
+    // Today without  hours, minutes and seconds
+    DateTime today = DateTime(now.year, now.month, now.day);
+    // From 6 forecast get the [today] one.
+    ConsolidatedWeather todayForecast = climate.consolidatedWeather.firstWhere(
+        (forecast) => forecast.applicableDate.isAtSameMomentAs(today));
+    // Return color based on weather status
+    Color color = CustomColor.weatherStateColor(
+      weatherStateAbbr: todayForecast.weatherStateAbbr,
+    );
+    _forecastColor.add(color);
+  }
 
   /// Dispose streams
   void dispose() {
     _locations.close();
     _forecast.close();
+    _forecastColor.close();
   }
 }

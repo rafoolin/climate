@@ -16,22 +16,17 @@ class SettingsPage extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(child: CustomAppBar(title: 'Settings')),
-          SliverToBoxAdapter(
-            child: ListView(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              children: ListTile.divideTiles(
-                context: context,
-                tiles: [
-                  const ThemeTile(),
-                  const LocationTile(),
-                  const TimezoneTile(),
-                  const TempTile(),
-                  const WindTile(),
-                  const PressureTile(),
-                  const DistanceTile(),
-                ],
-              ).toList(),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                const ThemeTile(),
+                const LocationTile(),
+                const TimezoneTile(),
+                const TempTile(),
+                const WindTile(),
+                const PressureTile(),
+                const DistanceTile(),
+              ],
             ),
           )
         ],
