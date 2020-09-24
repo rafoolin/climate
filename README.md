@@ -11,7 +11,8 @@ This project is very simple and I did my best to add comments for almost every s
 ## To-Do
 
 - [x] Support offline forecast.
-- [ ] Dark/Light Theme.
+- [x] Dark/Light Theme.
+- [x] Handle exceptions.
 
 ## Development Cycles
 
@@ -20,7 +21,11 @@ This project is very simple and I did my best to add comments for almost every s
 - [x] Database support
 - [x] Shared Preference
 - [x] bloc support
-- [ ] Setting page
+- [x] Setting page
+- [x] Drawer
+- [ ] Home page
+- [ ] Separate widgets
+- [ ] Performance check
 
 # Build
 
@@ -70,7 +75,15 @@ flutter help
 Here are some screenshots of the app.
 
 # Packages
-
+intl: # ^0.16.1
+http: # ^0.12.2
+sembast: # ^2.4.7+7
+path_provider: #  ^1.6.18
+rxdart: # ^0.24.1
+shared_preferences: # ^0.5.12
+font_awesome_flutter: # ^8.8.1
+weather_icons: # ^2.0.1
+flutter_svg: # ^0.19.0
 ```yaml
 
 ```
