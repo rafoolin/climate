@@ -150,7 +150,7 @@ class PersistHeaderWide extends StatelessWidget {
     print('PersistHeaderWide');
     ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
 
-    return StreamBuilder(
+    return StreamBuilder<LocationClimate>(
       stream: bloc.forecastStream,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {

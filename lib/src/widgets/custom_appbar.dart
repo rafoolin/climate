@@ -14,7 +14,7 @@ class CustomAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
     return SizedBox(
-      height: 120.0,
+      height: 132.0,
       width: MediaQuery.of(context).size.width,
       child: Stack(
         children: [
