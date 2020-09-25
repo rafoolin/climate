@@ -15,6 +15,7 @@ class ForecastBloc extends Bloc {
   final PreferencesBloc preferencesBloc;
   final _locations = BehaviorSubject<Map<String, bool>>();
   final _forecast = BehaviorSubject<LocationClimate>();
+  final _todayForecast = BehaviorSubject<ConsolidatedWeather>();
   final _forecastColor = BehaviorSubject<Color>();
   // All cached places
   Map _cachePlaces = HashMap<String, bool>();
@@ -119,10 +120,12 @@ class ForecastBloc extends Bloc {
         .then((climate) {
       // Add color when a climate is fetched
       _catchForecastColor(climate: climate);
+      _catchTodayForecast(climate: climate);
       return _forecast.add(climate);
     }).catchError((onError) async {
       // When there is an error add default color to stream
       _forecastColor.add(CustomColor.defaultColor);
+      _todayForecast.addError(onError);
       return _forecast.addError(onError);
     });
   }
@@ -167,10 +170,28 @@ class ForecastBloc extends Bloc {
     _forecastColor.add(color);
   }
 
+  // ================================================================================
+  // =                             TODAY  Forecast                                  =
+  // ================================================================================
+  /// Climate color condition stream
+  get todayForecastStream => _todayForecast.stream;
+
+  void _catchTodayForecast({LocationClimate climate}) async {
+    //  Time in location timezone
+    DateTime now = DateTime.now().toUtc().add(climate.offset);
+    // Today without  hours, minutes and seconds
+    DateTime today = DateTime(now.year, now.month, now.day);
+    // From 6 forecast get the [today] one.
+    ConsolidatedWeather todayForecast = climate.consolidatedWeather.firstWhere(
+        (forecast) => forecast.applicableDate.isAtSameMomentAs(today));
+    _todayForecast.add(todayForecast);
+  }
+
   /// Dispose streams
   void dispose() {
     _locations.close();
     _forecast.close();
     _forecastColor.close();
+    _todayForecast.close();
   }
 }
