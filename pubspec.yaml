@@ -23,16 +23,17 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
-  intl:
-  http:
-  flutter_svg:
-  rxdart:
-  shared_preferences:
-  weather_icons:
-  font_awesome_flutter:
-  url_launcher:
-  sembast:
-  path_provider:
+  intl: # ^0.16.1
+  http: # ^0.12.2
+  sembast: # ^2.4.7+7
+  path_provider: #  ^1.6.18
+  rxdart: # ^0.24.1
+  shared_preferences: # ^0.5.12
+  font_awesome_flutter: # ^8.8.1
+  weather_icons: # ^2.0.1
+  flutter_svg: # ^0.19.0
+  url_launcher: #^5.7.2
+  google_fonts: # ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -79,69 +80,10 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: CustomIcons
+    - family: CustomIcon
       fonts:
-        - asset: assets/fonts/custom_icons.ttf
-
-    - family: Gotham-Thin
-      fonts:
-        - asset: assets/fonts/gotham/Gotham-Thin.otf
+        - asset: assets/fonts/CustomIcon.ttf
           style: normal
-          weight: 100
-
-        - asset: assets/fonts/gotham/Gotham-Light.otf
-          style: normal
-          weight: 300
-
-        - asset: assets/fonts/gotham/Gotham-Regular.otf
-          style: normal
-          weight: 400
-
-        - asset: assets/fonts/gotham/Gotham-Medium.otf
-          style: normal
-          weight: 500
-
-        - asset: assets/fonts/gotham/Gotham-Black.otf
-          style: normal
-          weight: 900
-
-    - family: NotoSans
-      fonts:
-        - asset: assets/fonts/noto_sans/NotoSans-Thin.ttf
-          style: normal
-          weight: 100
-
-        - asset: assets/fonts/noto_sans/NotoSans-ExtraLight.ttf
-          style: normal
-          weight: 200
-
-        - asset: assets/fonts/noto_sans/NotoSans-Light.ttf
-          style: normal
-          weight: 300
-
-        - asset: assets/fonts/noto_sans/NotoSans-Regular.ttf
-          style: normal
-          weight: 400
-
-        - asset: assets/fonts/noto_sans/NotoSans-Medium.ttf
-          style: normal
-          weight: 500
-
-        - asset: assets/fonts/noto_sans/NotoSans-SemiBold.ttf
-          style: normal
-          weight: 600
-
-        - asset: assets/fonts/noto_sans/NotoSans-Bold.ttf
-          style: normal
-          weight: 700
-
-        - asset: assets/fonts/noto_sans/NotoSans-ExtraBold.ttf
-          style: normal
-          weight: 800
-
-        - asset: assets/fonts/noto_sans/NotoSans-Black.ttf
-          style: normal
-          weight: 900
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
