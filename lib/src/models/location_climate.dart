@@ -55,8 +55,8 @@ class LocationClimate extends Object {
     time = DateTime.parse(json['time']).toUtc();
     // Config Offset
     _offsetConfig();
-    sunRise = DateTime.parse(json['sun_rise']).toUtc().toUtc();
-    sunSet = DateTime.parse(json['sun_set']).toUtc().toUtc();
+    sunRise = DateTime.parse(json['sun_rise']).toUtc();
+    sunSet = DateTime.parse(json['sun_set']).toUtc();
     timezoneName = json['timezone_name'];
     parent = json['parent'] != null ? Parent.fromJson(json['parent']) : null;
     if (json['sources'] != null) {

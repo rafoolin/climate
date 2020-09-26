@@ -118,8 +118,6 @@ class ForecastBloc extends Bloc {
             await _repository.location(woeid: locations.first.woeid))
         // Add climate to stream
         .then((climate) {
-      // Add color when a climate is fetched
-      _catchForecastColor(climate: climate);
       _catchTodayForecast(climate: climate);
       return _forecast.add(climate);
     }).catchError((onError) async {
@@ -155,21 +153,6 @@ class ForecastBloc extends Bloc {
   /// Climate color condition stream
   get climateColorStream => _forecastColor.stream;
 
-  void _catchForecastColor({LocationClimate climate}) async {
-    //  Time in location timezone
-    DateTime now = DateTime.now().toUtc().add(climate.offset);
-    // Today without  hours, minutes and seconds
-    DateTime today = DateTime(now.year, now.month, now.day);
-    // From 6 forecast get the [today] one.
-    ConsolidatedWeather todayForecast = climate.consolidatedWeather.firstWhere(
-        (forecast) => forecast.applicableDate.isAtSameMomentAs(today));
-    // Return color based on weather status
-    Color color = CustomColor.weatherStateColor(
-      weatherStateAbbr: todayForecast.weatherStateAbbr,
-    );
-    _forecastColor.add(color);
-  }
-
   // ================================================================================
   // =                             TODAY  Forecast                                  =
   // ================================================================================
@@ -178,13 +161,25 @@ class ForecastBloc extends Bloc {
 
   void _catchTodayForecast({LocationClimate climate}) async {
     //  Time in location timezone
-    DateTime now = DateTime.now().toUtc().add(climate.offset);
+    DateTime now = DateTime.now().toUtc();
     // Today without  hours, minutes and seconds
-    DateTime today = DateTime(now.year, now.month, now.day);
+    DateTime today = DateTime.utc(now.year, now.month, now.day);
     // From 6 forecast get the [today] one.
     ConsolidatedWeather todayForecast = climate.consolidatedWeather.firstWhere(
-        (forecast) => forecast.applicableDate.isAtSameMomentAs(today));
-    _todayForecast.add(todayForecast);
+      (forecast) => forecast.applicableDate.isAtSameMomentAs(today),
+      orElse: () {
+        Exception exception =
+            Exception('Nothing found! Connect to the internet to get updates');
+        _todayForecast.addError(exception);
+        _forecastColor.add(CustomColor.defaultColor);
+        return null;
+      },
+    );
+    if (todayForecast != null) {
+      _todayForecast.add(todayForecast);
+      _forecastColor.add(CustomColor.weatherStateColor(
+          weatherStateAbbr: todayForecast.weatherStateAbbr));
+    }
   }
 
   /// Dispose streams

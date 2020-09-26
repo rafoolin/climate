@@ -40,8 +40,9 @@ class ConsolidatedWeather {
     weatherStateName = json['weather_state_name'];
     weatherStateAbbr = json['weather_state_abbr'];
     windDirectionCompass = json['wind_direction_compass'];
-    created = DateTime.parse(json['created']).toUtc();
-    applicableDate = DateTime.parse(json['applicable_date']).toUtc();
+    created = DateTime.parse(json['created']);
+    // Date in UTC
+    applicableDate = DateTime.parse('${json['applicable_date']}T00:00:00.000Z');
     minTemp = json['min_temp'];
     maxTemp = json['max_temp'];
     theTemp = json['the_temp'];
