@@ -5,8 +5,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CustomDrawer extends StatelessWidget {
+  const CustomDrawer();
   @override
   Widget build(BuildContext context) {
+    print('CustomDrawer');
     return Drawer(
       child: ListView(
         shrinkWrap: true,
@@ -14,24 +16,30 @@ class CustomDrawer extends StatelessWidget {
           const CustomDrawerHeader(),
           const DrawerThemeTile(),
           const DrawerExpansionList(),
-          Divider(),
-          ListTile(
-            title: Text('Setting'),
-            leading: Icon(FontAwesomeIcons.cog),
-            onTap: () =>
-                Navigator.of(context).pushNamed(SettingsPage.routeName),
-          ),
-          CustomAboutDialog(
-            applicationIcon: SvgPicture.asset(
-              'assets/img/logo/daylight_logo.svg',
-              width: 50.0,
-              height: 50.0,
+          const Divider(),
+          ListTileTheme(
+            child: ListTile(
+              title: Text('Setting'),
+              leading: Icon(FontAwesomeIcons.cog),
+              onTap: () =>
+                  Navigator.of(context).pushNamed(SettingsPage.routeName),
             ),
-            applicationName: 'Climate',
-            applicationVersion: '1.0.0',
-            child: Text('About'),
-            icon: Icon(FontAwesomeIcons.infoCircle),
-            applicationLegalese: 'Climate is a simple weather app!',
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+          ListTileTheme(
+            child: CustomAboutDialog(
+              applicationIcon: SvgPicture.asset(
+                'assets/img/logo/daylight_logo.svg',
+                width: 50.0,
+                height: 50.0,
+              ),
+              applicationName: 'Climate',
+              applicationVersion: '1.0.0',
+              child: Text('About'),
+              icon: Icon(FontAwesomeIcons.infoCircle),
+              applicationLegalese: 'Climate is a simple weather app!',
+            ),
+            iconColor: Theme.of(context).iconTheme.color,
           ),
         ],
       ),
@@ -39,6 +47,7 @@ class CustomDrawer extends StatelessWidget {
   }
 }
 
+// ------------------------------- CustomDrawerHeader -------------------------------
 class CustomDrawerHeader extends StatelessWidget {
   const CustomDrawerHeader();
   @override
@@ -57,6 +66,8 @@ class CustomDrawerHeader extends StatelessWidget {
                 Theme.of(context).brightness == Brightness.dark
                     ? 'assets/img/logo/night_logo.svg'
                     : 'assets/img/logo/daylight_logo.svg',
+                width: 100,
+                height: 100,
               ),
             );
             break;
@@ -68,6 +79,7 @@ class CustomDrawerHeader extends StatelessWidget {
   }
 }
 
+// ------------------------------ DrawerExpansionList ------------------------------
 class DrawerExpansionList extends StatelessWidget {
   const DrawerExpansionList();
   @override
@@ -82,24 +94,26 @@ class DrawerExpansionList extends StatelessWidget {
           case ConnectionState.active:
           case ConnectionState.done:
             List<String> places = snapshot.data;
+
             return ExpansionTile(
               leading: Icon(FontAwesomeIcons.city),
               maintainState: true,
               title: Text('Locations'),
               children: places.isEmpty
                   ? [
-                      ListTile(
-                        title: Text('Add New Location'),
-                        leading: Icon(FontAwesomeIcons.plus),
-                        onTap: () => Navigator.of(context)
-                            .pushNamed(LocationPage.routeName),
+                      ListTileTheme(
+                        child: ListTile(
+                          title: Text('Add New Location'),
+                          leading: Icon(FontAwesomeIcons.plus),
+                          onTap: () => Navigator.of(context)
+                              .pushNamed(LocationPage.routeName),
+                        ),
+                        iconColor: Theme.of(context).iconTheme.color,
                       )
                     ]
                   : places
                       .map(
-                        (place) => DrawerPlaceTile(
-                          place: place,
-                        ),
+                        (place) => DrawerPlaceTile(place: place),
                       )
                       .toList(),
             );
@@ -112,6 +126,7 @@ class DrawerExpansionList extends StatelessWidget {
   }
 }
 
+// -------------------------------- DrawerPlaceTile --------------------------------
 class DrawerPlaceTile extends StatelessWidget {
   final String place;
 
@@ -127,11 +142,12 @@ class DrawerPlaceTile extends StatelessWidget {
           case ConnectionState.active:
           case ConnectionState.done:
             return ListTile(
-              title: Text(
-                place,
-              ),
+              title: Text(place, style: Theme.of(context).textTheme.subtitle1),
               trailing: snapshot.data.compareTo(place) == 0
-                  ? Icon(Icons.my_location)
+                  ? Icon(
+                      Icons.my_location,
+                      color: Theme.of(context).accentColor,
+                    )
                   : null,
               onTap: () async => await bloc.saveLocation(location: place),
             );
@@ -144,6 +160,7 @@ class DrawerPlaceTile extends StatelessWidget {
   }
 }
 
+// -------------------------------- DrawerThemeTile --------------------------------
 class DrawerThemeTile extends StatelessWidget {
   const DrawerThemeTile();
 
@@ -160,15 +177,19 @@ class DrawerThemeTile extends StatelessWidget {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
           case ConnectionState.active:
-            return SwitchListTile(
-              title: Text('Theme'),
-              secondary: snapshot.data
-                  ? Icon(FontAwesomeIcons.moon)
-                  : Icon(FontAwesomeIcons.solidSun),
-              value: snapshot.data,
-              onChanged: (value) async {
-                await bloc.saveTheme(isDark: value);
-              },
+            return ListTileTheme(
+              child: SwitchListTile(
+                activeColor: Theme.of(context).accentColor,
+                title: Text('Theme'),
+                secondary: snapshot.data
+                    ? Icon(FontAwesomeIcons.moon)
+                    : Icon(FontAwesomeIcons.solidSun),
+                value: snapshot.data,
+                onChanged: (value) async {
+                  await bloc.saveTheme(isDark: value);
+                },
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
             );
             break;
           case ConnectionState.waiting:
@@ -180,6 +201,7 @@ class DrawerThemeTile extends StatelessWidget {
   }
 }
 
+// ------------------------------- CustomAboutDialog -------------------------------
 class CustomAboutDialog extends StatelessWidget {
   final Widget icon;
   final Widget child;
@@ -200,6 +222,7 @@ class CustomAboutDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('About');
     return ListTile(
       dense: dense,
       title: child ?? Text('About'),

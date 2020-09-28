@@ -19,12 +19,18 @@ class _CustomExpansionState extends State<CustomExpansion>
   @override
   void initState() {
     _bloc = BlocProvider.of<PreferencesBloc>(context);
-    _controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+    // At least 3/4 child be presented then by clicking the
+    // button it shows all the items.
     _size = Tween(
-            begin: 3 * widget.itemExtent,
-            end: widget.itemExtent * (widget.children.length + 1))
+            // At least 3/4
+            begin: 4 * widget.itemExtent,
+            // Add some spaces between button and last item
+            // +2 is for that reason.
+            end: widget.itemExtent * (widget.children.length + 2))
         .animate(_controller);
     super.initState();
   }
@@ -32,7 +38,6 @@ class _CustomExpansionState extends State<CustomExpansion>
   @override
   Widget build(BuildContext context) {
     print('CustomExpansion');
-
     return AnimatedBuilder(
       animation: _controller,
       child: Stack(

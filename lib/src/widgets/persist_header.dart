@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 
 class PersistHeader extends SliverPersistentHeaderDelegate {
   final double height;
-  PersistHeader({@required this.height});
+  const PersistHeader({@required this.height});
 
   /// Return correct opacity to set for each widget, based on the barStatus
   double _getOpacity(double shrinkOffset) {
@@ -29,6 +29,7 @@ class PersistHeader extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
+    print('PersistHeader');
     double top = MediaQuery.of(context).padding.top;
     return Stack(
       children: [
@@ -43,24 +44,26 @@ class PersistHeader extends SliverPersistentHeaderDelegate {
           top: top + 56.0,
           left: 24.0,
           right: 24.0,
-          bottom: 48.0,
-          child: Opacity(
+          bottom: 68.0,
+          child: AnimatedOpacity(
             opacity: _getOpacity(shrinkOffset),
+            duration: const Duration(milliseconds: 100),
             child: const PersistHeaderWide(),
           ),
         ),
         Positioned(
           top: top + 56.0,
-          left: 16.0,
-          right: 16.0,
-          bottom: 48.0,
-          child: Opacity(
+          left: 24.0,
+          right: 24.0,
+          bottom: 68.0,
+          child: AnimatedOpacity(
             opacity: 1 - _getOpacity(shrinkOffset),
+            duration: const Duration(milliseconds: 100),
             child: const PersistHeaderNarrow(),
           ),
         ),
         Positioned(
-          bottom: 32.0,
+          bottom: 36.0,
           left: 16.0,
           child: const PersistHeaderLastUpdate(),
         ),
@@ -78,6 +81,7 @@ class PersistHeader extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) => false;
 }
 
+// -------------------------------- PersistHeaderBg --------------------------------
 class PersistHeaderBg extends StatelessWidget {
   const PersistHeaderBg();
   @override
@@ -99,7 +103,7 @@ class PersistHeaderBg extends StatelessWidget {
           default:
             return ClipPath(
               clipper: Clipper(),
-              child: Skeleton(),
+              child: const Skeleton(),
             );
         }
       },
@@ -107,6 +111,7 @@ class PersistHeaderBg extends StatelessWidget {
   }
 }
 
+// ------------------------------ PersistHeaderAppBar ------------------------------
 class PersistHeaderAppBar extends StatelessWidget {
   const PersistHeaderAppBar();
   @override
@@ -121,7 +126,6 @@ class PersistHeaderAppBar extends StatelessWidget {
           case ConnectionState.active:
           case ConnectionState.done:
             return AppBar(
-              elevation: 0.0,
               backgroundColor: snapshot.data,
               actions: [
                 Tooltip(
@@ -143,6 +147,7 @@ class PersistHeaderAppBar extends StatelessWidget {
   }
 }
 
+// ------------------------------- PersistHeaderWide -------------------------------
 class PersistHeaderWide extends StatelessWidget {
   const PersistHeaderWide({Key key}) : super(key: key);
   @override
@@ -165,24 +170,24 @@ class PersistHeaderWide extends StatelessWidget {
                 Expanded(
                   flex: 1,
                   child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
+                      Flexible(
                         flex: 2,
-                        child: FittedBox(
-                          alignment: Alignment.centerRight,
-                          child: Icon(
-                            Icons.location_on,
-                            color: Colors.white,
-                          ),
+                        child: Icon(
+                          Icons.location_on,
+                          color: Colors.white,
+                          size: 65,
                         ),
                       ),
-                      Expanded(
+                      Flexible(
                         flex: 3,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              flex: 2,
+                              flex: 3,
                               child: FittedBox(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
@@ -197,7 +202,7 @@ class PersistHeaderWide extends StatelessWidget {
                               ),
                             ),
                             Expanded(
-                              flex: 1,
+                              flex: 2,
                               child: FittedBox(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
@@ -252,6 +257,7 @@ class PersistHeaderWide extends StatelessWidget {
   }
 }
 
+// ------------------------------ PersistHeaderNarrow ------------------------------
 class PersistHeaderNarrow extends StatelessWidget {
   const PersistHeaderNarrow();
   @override
@@ -268,54 +274,77 @@ class PersistHeaderNarrow extends StatelessWidget {
             LocationClimate climate = snapshot.data;
 
             return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   flex: 2,
-                  child: FittedBox(
-                    alignment: Alignment.center,
-                    child: Icon(Icons.location_on, color: Colors.white),
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: FittedBox(
-                          alignment: Alignment.bottomLeft,
-                          child: Text(
-                            climate.title,
-                            style:
-                                Theme.of(context).textTheme.headline4.copyWith(
-                                      color: Colors.white,
-                                    ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 23),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: FittedBox(
+                            alignment: Alignment.centerLeft,
+                            child: Icon(
+                              Icons.location_on,
+                              color: Colors.white,
+                              size: 65,
+                            ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: FittedBox(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            DateFormat.yMd().format(climate.time),
-                            style: Theme.of(context).textTheme.caption.copyWith(
-                                  color: Colors.white54,
-                                  fontWeight: FontWeight.w300,
+                        Flexible(
+                          flex: 5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: FittedBox(
+                                  alignment: Alignment.bottomLeft,
+                                  child: Text(
+                                    climate.title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headline4
+                                        .copyWith(
+                                          color: Colors.white,
+                                        ),
+                                  ),
                                 ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: FittedBox(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    DateFormat.yMd().format(climate.time),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .caption
+                                        .copyWith(
+                                          color: Colors.white54,
+                                          fontWeight: FontWeight.w300,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Expanded(
-                  flex: 6,
+                  flex: 2,
                   child: StreamBuilder(
                     stream: bloc.todayForecastStream,
                     builder: (context, snapshot) {
@@ -325,8 +354,7 @@ class PersistHeaderNarrow extends StatelessWidget {
                           String svgFile =
                               snapshot.data.weatherStateName.split(' ').join();
                           return Container(
-                            alignment: Alignment.center,
-                            padding: EdgeInsets.only(top: 16.0),
+                            alignment: Alignment.centerRight,
                             child: SvgPicture.asset(
                               'assets/img/climate_status/$svgFile.svg',
                               fit: BoxFit.contain,
@@ -351,58 +379,66 @@ class PersistHeaderNarrow extends StatelessWidget {
   }
 }
 
+// ---------------------------- PersistHeaderLastUpdate ----------------------------
 class PersistHeaderLastUpdate extends StatelessWidget {
   const PersistHeaderLastUpdate();
   @override
   Widget build(BuildContext context) {
     print('PersistHeaderLastUpdate');
     ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
-    PreferencesBloc pref = BlocProvider.of<PreferencesBloc>(context);
 
-    return StreamBuilder(
-      stream: pref.timezoneStream,
-      builder: (context, AsyncSnapshot<TimezoneChoice> timezoneSnapshot) {
-        switch (timezoneSnapshot.connectionState) {
+    return StreamBuilder<ConsolidatedWeather>(
+      stream: bloc.todayForecastStream,
+      builder: (context, climateSnapshot) {
+        switch (climateSnapshot.connectionState) {
           case ConnectionState.active:
           case ConnectionState.done:
-            return StreamBuilder<LocationClimate>(
-              stream: bloc.forecastStream,
-              builder: (context, climateSnapshot) {
-                switch (climateSnapshot.connectionState) {
-                  case ConnectionState.active:
-                  case ConnectionState.done:
-                    String date = DateFormat.Hms().format(
-                      UnitConverter.timezoneConverter(
-                        time: climateSnapshot.data.time
-                            .add(climateSnapshot.data.offset),
-                        offset: climateSnapshot.data.offset,
-                        timezone: timezoneSnapshot.data,
-                      ),
-                    );
+            DateTime time = climateSnapshot.data.created;
 
-                    String timezoneName = UnitConverter.timezoneName(
-                      climateTimezoneName: climateSnapshot.data.timezoneName,
-                      timezone: timezoneSnapshot.data,
-                    );
-                    return Text(
-                      'Last Update($timezoneName): $date',
-                      style: Theme.of(context)
-                          .textTheme
-                          .overline
-                          .copyWith(color: Colors.white70),
-                    );
-                    break;
-                  default:
-                    return Container();
-                }
-              },
+            return SizedBox(
+              height: 24.0,
+              width: MediaQuery.of(context).size.width / 2,
+              child: FittedBox(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  'Updated ${_lastUpdate(time)}',
+                  style: Theme.of(context)
+                      .textTheme
+                      .overline
+                      .copyWith(color: Colors.white70),
+                ),
+              ),
             );
-
             break;
           default:
             return Container();
         }
       },
     );
+  }
+
+  String _lastUpdate(DateTime time) {
+    String minuteStr(int minutes) => minutes > 1 ? 'minutes' : 'minute';
+    String hourStr(int hours) => hours > 1 ? 'hours' : 'hour';
+    String secondStr(int seconds) => seconds > 1 ? 'seconds' : 'second';
+
+    time = time.toUtc();
+    DateTime now = DateTime.now().toUtc();
+    Duration diff = now.difference(time.toUtc());
+    int days = diff.inDays;
+    int hours = diff.inHours.remainder(Duration.hoursPerDay);
+    int minutes = diff.inMinutes.remainder(Duration.minutesPerHour);
+    int seconds = diff.inSeconds.remainder(Duration.secondsPerMinute);
+
+    if (days > 1)
+      return '$days days ago';
+    else if (days == 1)
+      return 'Yesterday';
+    else if (hours >= 1)
+      return '$hours ${hourStr(hours)}, $minutes ${minuteStr(minutes)} ago';
+    else if (minutes >= 1)
+      return '$minutes ${minuteStr(minutes)} ago';
+    else
+      return '$seconds ${secondStr(seconds)} ago';
   }
 }

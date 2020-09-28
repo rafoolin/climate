@@ -1,5 +1,4 @@
 import 'package:climate/src/blocs/blocs.dart';
-import 'package:climate/src/configs/configs.dart';
 import 'package:climate/src/models/models.dart';
 import 'package:climate/src/utils/utils.dart';
 import 'package:climate/src/widgets/widgets.dart';
@@ -10,19 +9,15 @@ class WeatherStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('WeatherStatus');
-    ForecastBloc forecastBloc = BlocProvider.of<ForecastBloc>(context)
-      ..fetchForecast();
+    ForecastBloc forecastBloc = BlocProvider.of<ForecastBloc>(context);
     PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
 
-    return StreamBuilder<LocationClimate>(
-      stream: forecastBloc.forecastStream,
-      builder: (context, AsyncSnapshot<LocationClimate> snapshot) {
-        switch (snapshot.connectionState) {
+    return StreamBuilder<ConsolidatedWeather>(
+      stream: forecastBloc.todayForecastStream,
+      builder: (context, AsyncSnapshot<ConsolidatedWeather> forecastSnapshot) {
+        switch (forecastSnapshot.connectionState) {
           case ConnectionState.active:
           case ConnectionState.done:
-            ConsolidatedWeather todayForecast =
-                snapshot.data.consolidatedWeather.first;
-
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               mainAxisSize: MainAxisSize.max,
@@ -30,41 +25,52 @@ class WeatherStatus extends StatelessWidget {
               children: [
                 StreamBuilder<TempUnit>(
                   stream: prefBloc.tempStream,
-                  builder: (context, AsyncSnapshot<TempUnit> snapshot) {
-                    switch (snapshot.connectionState) {
+                  builder: (context, AsyncSnapshot<TempUnit> tempSnapshot) {
+                    switch (tempSnapshot.connectionState) {
                       case ConnectionState.active:
                       case ConnectionState.done:
+                        // Temp saved unit
+                        TempUnit unit = tempSnapshot.data;
+                        // Temp in user desired unit
                         double temp = UnitConverter.tempConverter(
-                          unit: snapshot.data,
-                          amount: todayForecast.theTemp,
+                          unit: unit,
+                          amount: forecastSnapshot.data.theTemp,
                         );
-
-                        TempUnit unit = snapshot.data;
-                        return RichText(
-                          text: TextSpan(
-                            style: TextStyle(
-                              fontSize: 45.0,
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black87,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            text: '${temp.floor()}',
-                            children: [
-                              TextSpan(
-                                text: unit == TempUnit.K
-                                    ? '${UnitConverter.strUnit(unit).toUpperCase()}'
-                                    : '°${UnitConverter.strUnit(unit).toUpperCase()}',
-                                style: TextStyle(
-                                  color: CustomColor.weatherStateColor(
-                                    weatherStateAbbr:
-                                        todayForecast.weatherStateAbbr,
+                        // Temp unit in weather condition Color
+                        return StreamBuilder<Color>(
+                          stream: forecastBloc.climateColorStream,
+                          builder: (context, colorSnapshot) {
+                            switch (colorSnapshot.connectionState) {
+                              case ConnectionState.active:
+                              case ConnectionState.done:
+                                return RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      fontSize: 45.0,
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    text: '${temp.floor()}',
+                                    children: [
+                                      TextSpan(
+                                        text: unit == TempUnit.K
+                                            ? '${UnitConverter.strUnit(unit).toUpperCase()}'
+                                            : '°${UnitConverter.strUnit(unit).toUpperCase()}',
+                                        style: TextStyle(
+                                          color: colorSnapshot.data,
+                                        ),
+                                      )
+                                    ],
                                   ),
-                                ),
-                              )
-                            ],
-                          ),
+                                );
+                                break;
+                              default:
+                                return Container();
+                            }
+                          },
                         );
                         break;
                       default:
@@ -76,9 +82,9 @@ class WeatherStatus extends StatelessWidget {
                   fit: BoxFit.cover,
                   alignment: Alignment.center,
                   child: Text(
-                    todayForecast.weatherStateName,
+                    forecastSnapshot.data.weatherStateName,
                     style: Theme.of(context).textTheme.bodyText1.copyWith(
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w700,
                         ),
                   ),
                 )
@@ -89,7 +95,7 @@ class WeatherStatus extends StatelessWidget {
           default:
             return Container(
               margin: EdgeInsets.symmetric(horizontal: 64.0),
-              child: Skeleton(),
+              child: const Skeleton(),
               width: 64.0,
               height: 64.0,
             );

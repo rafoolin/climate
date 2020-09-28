@@ -24,8 +24,21 @@ class Sources extends StatelessWidget {
               itemBuilder: (context, index) {
                 Source source = sources[index];
                 return ListTile(
-                  title: Text(source.title),
-                  subtitle: Text(source.url),
+                  title: Text(
+                    source.title,
+                    style: Theme.of(context)
+                        .textTheme
+                        .subtitle2
+                        .copyWith(fontSize: 12.0),
+                  ),
+                  subtitle: Text(
+                    source.url,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyText2
+                        .copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+                  ),
                   onTap: () async {
                     await canLaunch(source.url)
                         .then((value) async => await launch(source.url))

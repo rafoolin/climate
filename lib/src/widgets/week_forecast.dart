@@ -9,109 +9,106 @@ class WeekForecast extends StatelessWidget {
   const WeekForecast();
   @override
   Widget build(BuildContext context) {
-    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
-    return StreamBuilder<LocationClimate>(
-      stream: bloc.forecastStream,
-      builder: (context, forecastSnapshot) {
-        switch (forecastSnapshot.connectionState) {
-          case ConnectionState.active:
-          case ConnectionState.done:
-            return CustomExpansion(
-              children: forecastSnapshot.data.consolidatedWeather
-                  .map((forecast) => ForecastTempTile(forecast: forecast))
-                  .toList(),
-            );
-            break;
-          default:
-            return ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: 6,
-              itemBuilder: (context, index) => ListTile(
-                title: Skeleton(height: 36.0),
-                trailing: Skeleton(width: 64, height: 36.0),
-              ),
-            );
-        }
-      },
-    );
-  }
-}
-
-class ForecastTempTile extends StatelessWidget {
-  final ConsolidatedWeather forecast;
-  const ForecastTempTile({Key key, this.forecast}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    print('ForecastTempTile');
-    PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
+    print('WeekForecast');
+    ForecastBloc forecastBloc = BlocProvider.of<ForecastBloc>(context);
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    int minTemp;
+    int maxTemp;
+    String unit;
     return StreamBuilder<TempUnit>(
-      stream: bloc.tempStream,
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
+      stream: prefBloc.tempStream,
+      builder: (context, tempSnapshot) {
+        switch (tempSnapshot.connectionState) {
           case ConnectionState.active:
           case ConnectionState.done:
-            return Container(
-              height: 36.0,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${_dayName(forecast.applicableDate)}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyText1
-                        .copyWith(fontWeight: FontWeight.w500),
-                  ),
-                  snapshot.data == TempUnit.K
-                      ? Text(
-                          '${forecast.minTemp?.floor() ?? '-'}/${forecast.maxTemp?.floor() ?? '-'}K',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyText1
-                              .copyWith(fontWeight: FontWeight.w500),
-                        )
-                      : Text(
-                          '${forecast.minTemp?.floor() ?? '-'}/${forecast.maxTemp?.floor() ?? '-'}°${UnitConverter.strUnit(snapshot.data)}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyText1
-                              .copyWith(fontWeight: FontWeight.w500),
-                        ),
-                ],
-              ),
+            return StreamBuilder<LocationClimate>(
+              stream: forecastBloc.forecastStream,
+              builder: (context, forecastSnapshot) {
+                switch (forecastSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    return CustomExpansion(
+                      children: forecastSnapshot.data.consolidatedWeather
+                          .map((forecast) {
+                        // min temp in user desired unit
+                        minTemp = UnitConverter.tempConverter(
+                          amount: forecast.minTemp,
+                          unit: tempSnapshot.data,
+                        ).floor();
+
+                        // max temp in user desired unit
+                        maxTemp = UnitConverter.tempConverter(
+                          amount: forecast.maxTemp,
+                          unit: tempSnapshot.data,
+                        ).floor();
+                        unit =
+                            // Kelvin comes without degree sign
+                            tempSnapshot.data == TempUnit.K
+                                ? 'K'
+                                : '°' +
+                                    UnitConverter.strUnit(tempSnapshot.data)
+                                        .toUpperCase();
+
+                        return Container(
+                          height: 36.0,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${_dayName(forecast.applicableDate)}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText1
+                                    .copyWith(fontWeight: FontWeight.w500),
+                              ),
+                              Text(
+                                '$minTemp/$maxTemp' + unit,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText1
+                                    .copyWith(fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    );
+                    break;
+                  default:
+                    return ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: 6,
+                      itemBuilder: (context, index) => ListTile(
+                        title: const Skeleton(height: 36.0),
+                        trailing: const Skeleton(width: 64, height: 36.0),
+                      ),
+                    );
+                }
+              },
             );
             break;
           default:
-            return ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: 6,
-              itemBuilder: (context, index) => ListTile(
-                title: Skeleton(height: 36.0),
-                trailing: Skeleton(width: 64, height: 36.0),
-              ),
-            );
+            return const Skeleton();
         }
       },
     );
   }
 
   String _dayName(DateTime dateTime) {
+    //TODO:: Date times based on user defined timezone
+
     DateFormat _df = DateFormat.Md();
-    // now in desired timezone
-    DateTime now = DateTime.now().toUtc();
-
-    // today in desired timezone
-    DateTime today = DateTime(now.year, now.month, now.day).toUtc();
-
-    // tomorrow in desired timezone
-    DateTime tomorrow = DateTime(now.year, now.month, now.day + 1).toUtc();
+    // Time in Local
+    DateTime now = DateTime.now();
+    // Time in UTC
+    DateTime today = DateTime.utc(now.year, now.month, now.day);
+    DateTime tomorrow = DateTime.utc(now.year, now.month, now.day + 1);
 
     if (dateTime.isAtSameMomentAs(today))
       return "Today";
-    else if (dateTime == tomorrow)
+    else if (dateTime.isAtSameMomentAs(tomorrow))
       return "Tomorrow.${_df.format(dateTime)}";
     else
       return _df.format(dateTime);

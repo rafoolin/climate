@@ -161,8 +161,8 @@ class ForecastBloc extends Bloc {
 
   void _catchTodayForecast({LocationClimate climate}) async {
     //  Time in location timezone
-    DateTime now = DateTime.now().toUtc();
-    // Today without  hours, minutes and seconds
+    DateTime now = DateTime.now();
+    // Today without  hours, minutes and seconds in UTC
     DateTime today = DateTime.utc(now.year, now.month, now.day);
     // From 6 forecast get the [today] one.
     ConsolidatedWeather todayForecast = climate.consolidatedWeather.firstWhere(
