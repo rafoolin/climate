@@ -15,7 +15,7 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: CustomAppBar(title: 'Settings')),
+          SliverToBoxAdapter(child: const CustomAppBar(title: 'Settings')),
           SliverList(
             delegate: SliverChildListDelegate(
               [
@@ -35,9 +35,7 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-// ================================================================================
-// =                                 THEME TILE                                   =
-// ================================================================================
+// ----------------------------------- ThemeTile -----------------------------------
 class ThemeTile extends StatelessWidget {
   const ThemeTile();
 
@@ -54,16 +52,20 @@ class ThemeTile extends StatelessWidget {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
           case ConnectionState.active:
-            return SwitchListTile(
-              title: Text('Theme'),
-              secondary: snapshot.data
-                  ? Icon(FontAwesomeIcons.moon)
-                  : Icon(FontAwesomeIcons.solidSun),
-              subtitle: snapshot.data ? Text('Dark') : Text('Light'),
-              value: snapshot.data,
-              onChanged: (value) async {
-                await bloc.saveTheme(isDark: value);
-              },
+            return ListTileTheme(
+              child: SwitchListTile(
+                activeColor: Theme.of(context).accentColor,
+                title: Text('Theme'),
+                secondary: snapshot.data
+                    ? Icon(FontAwesomeIcons.moon)
+                    : Icon(FontAwesomeIcons.solidSun),
+                subtitle: snapshot.data ? Text('Dark') : Text('Light'),
+                value: snapshot.data,
+                onChanged: (value) async {
+                  await bloc.saveTheme(isDark: value);
+                },
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
             );
             break;
           case ConnectionState.waiting:
@@ -75,9 +77,7 @@ class ThemeTile extends StatelessWidget {
   }
 }
 
-// ================================================================================
-// =                                LOCATION TILE                                 =
-// ================================================================================
+// ---------------------------------- LocationTile ----------------------------------
 class LocationTile extends StatelessWidget {
   const LocationTile();
   @override
@@ -95,14 +95,17 @@ class LocationTile extends StatelessWidget {
           case ConnectionState.done:
           case ConnectionState.active:
             location = snapshot.data;
-            return ListTile(
-              title: Text('Location'),
-              leading: location.isEmpty
-                  ? Icon(Icons.location_searching)
-                  : Icon(Icons.my_location),
-              subtitle: Text(location.isEmpty ? 'No Location' : location),
-              onTap: () =>
-                  Navigator.of(context).pushNamed(LocationPage.routeName),
+            return ListTileTheme(
+              child: ListTile(
+                title: Text('Location'),
+                leading: location.isEmpty
+                    ? Icon(Icons.location_searching)
+                    : Icon(Icons.my_location),
+                subtitle: Text(location.isEmpty ? 'No Location' : location),
+                onTap: () =>
+                    Navigator.of(context).pushNamed(LocationPage.routeName),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
             );
             break;
           case ConnectionState.waiting:
@@ -114,44 +117,43 @@ class LocationTile extends StatelessWidget {
   }
 }
 
-// ================================================================================
-// =                                TIMEZONE TILE                                 =
-// ================================================================================
+// ---------------------------------- TimezoneTile ----------------------------------
 class TimezoneTile extends StatelessWidget {
   const TimezoneTile();
   @override
   Widget build(BuildContext context) {
     print('TimezoneTile');
     ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
-    return ListTile(
-      title: Text('Timezone'),
-      leading: Icon(FontAwesomeIcons.globe),
-      subtitle: StreamBuilder(
-        stream: bloc.timezoneNameStream,
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<String> snapshot,
-        ) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-            case ConnectionState.active:
-              print('TimezoneTile ${snapshot.data}');
-              return Text(snapshot.data);
-              break;
-            case ConnectionState.waiting:
-            default:
-              return Container();
-          }
-        },
-      ),
-      onTap: () => Navigator.of(context).pushNamed(TimezonePage.routeName),
+    return StreamBuilder(
+      stream: bloc.timezoneNameStream,
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<String> snapshot,
+      ) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.done:
+          case ConnectionState.active:
+            return ListTileTheme(
+              child: ListTile(
+                title: Text('Timezone'),
+                leading: Icon(FontAwesomeIcons.globe),
+                subtitle: Text(snapshot.data),
+                onTap: () =>
+                    Navigator.of(context).pushNamed(TimezonePage.routeName),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
+            );
+            break;
+          case ConnectionState.waiting:
+          default:
+            return Container();
+        }
+      },
     );
   }
 }
 
-// ================================================================================
-// =                                  TEMP TILE                                   =
-// ================================================================================
+// ------------------------------------ TempTile ------------------------------------
 class TempTile extends StatelessWidget {
   const TempTile();
   @override
@@ -169,14 +171,19 @@ class TempTile extends StatelessWidget {
           case ConnectionState.done:
           case ConnectionState.active:
             unit = snapshot.data;
-            return ListTile(
-              title: Text('Temperature'),
-              leading: Icon(
-                WeatherIcons.thermometer,
+            return ListTileTheme(
+              child: ListTile(
+                title: Text('Temperature'),
+                leading: Icon(
+                  WeatherIcons.thermometer,
+                ),
+                subtitle: snapshot.data == TempUnit.K
+                    ? Text('${UnitConverter.strUnit(unit)}')
+                    : Text('°${UnitConverter.strUnit(unit)}'),
+                onTap: () async =>
+                    await Navigator.of(context).pushNamed(TempPage.routeName),
               ),
-              subtitle: Text('°${UnitConverter.strUnit(unit)}'),
-              onTap: () async =>
-                  await Navigator.of(context).pushNamed(TempPage.routeName),
+              iconColor: Theme.of(context).iconTheme.color,
             );
             break;
           case ConnectionState.waiting:
@@ -188,9 +195,7 @@ class TempTile extends StatelessWidget {
   }
 }
 
-// ================================================================================
-// =                                  WIND TILE                                   =
-// ================================================================================
+// ------------------------------------ WindTile ------------------------------------
 class WindTile extends StatelessWidget {
   const WindTile();
   @override
@@ -208,11 +213,15 @@ class WindTile extends StatelessWidget {
           case ConnectionState.done:
           case ConnectionState.active:
             unit = snapshot.data;
-            return ListTile(
-              title: Text('Wind Speed'),
-              leading: Icon(WeatherIcons.strong_wind),
-              subtitle: Text('${UnitConverter.strUnit(unit)}'),
-              onTap: () => Navigator.of(context).pushNamed(WindPage.routeName),
+            return ListTileTheme(
+              child: ListTile(
+                title: Text('Wind Speed'),
+                leading: Icon(WeatherIcons.strong_wind),
+                subtitle: Text('${UnitConverter.strUnit(unit)}'),
+                onTap: () =>
+                    Navigator.of(context).pushNamed(WindPage.routeName),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
             );
             break;
           case ConnectionState.waiting:
@@ -224,9 +233,7 @@ class WindTile extends StatelessWidget {
   }
 }
 
-// ================================================================================
-// =                                PRESSURE TILE                                 =
-// ================================================================================
+// ---------------------------------- PressureTile ----------------------------------
 class PressureTile extends StatelessWidget {
   const PressureTile();
   @override
@@ -244,12 +251,15 @@ class PressureTile extends StatelessWidget {
           case ConnectionState.done:
           case ConnectionState.active:
             unit = snapshot.data;
-            return ListTile(
-              title: Text('Pressure'),
-              leading: Icon(WeatherIcons.barometer),
-              subtitle: Text('${UnitConverter.strUnit(unit)}'),
-              onTap: () =>
-                  Navigator.of(context).pushNamed(PressurePage.routeName),
+            return ListTileTheme(
+              child: ListTile(
+                title: Text('Pressure'),
+                leading: Icon(WeatherIcons.barometer),
+                subtitle: Text('${UnitConverter.strUnit(unit)}'),
+                onTap: () =>
+                    Navigator.of(context).pushNamed(PressurePage.routeName),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
             );
             break;
           case ConnectionState.waiting:
@@ -261,9 +271,7 @@ class PressureTile extends StatelessWidget {
   }
 }
 
-// ================================================================================
-// =                                DISTANCE TILE                                 =
-// ================================================================================
+// ---------------------------------- DistanceTile ----------------------------------
 class DistanceTile extends StatelessWidget {
   const DistanceTile();
   @override
@@ -281,12 +289,15 @@ class DistanceTile extends StatelessWidget {
           case ConnectionState.done:
           case ConnectionState.active:
             unit = snapshot.data;
-            return ListTile(
-              title: Text('Distance'),
-              leading: Icon(FontAwesomeIcons.route),
-              subtitle: Text('${UnitConverter.strUnit(unit)}'),
-              onTap: () =>
-                  Navigator.of(context).pushNamed(DistancePage.routeName),
+            return ListTileTheme(
+              child: ListTile(
+                title: Text('Distance'),
+                leading: Icon(FontAwesomeIcons.route),
+                subtitle: Text('${UnitConverter.strUnit(unit)}'),
+                onTap: () =>
+                    Navigator.of(context).pushNamed(DistancePage.routeName),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
             );
             break;
           case ConnectionState.waiting:

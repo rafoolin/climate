@@ -6,26 +6,14 @@ Climate is a Simple Weather app.
 
 ## Getting Started
 
-This project is very simple and I did my best to add comments for almost every section to make it clear.
+This project is very simple and I did my best to add comments for almost every section to make it clear.You can download APK from release section.
 
 ## To-Do
 
-- [x] Support offline forecast.
-- [x] Dark/Light Theme.
-- [x] Handle exceptions.
-
-## Development Cycles
-
-- [x] Models
-- [x] API
-- [x] Database support
-- [x] Shared Preference
-- [x] bloc support
-- [x] Setting page
-- [x] Drawer
-- [ ] Home page
-- [ ] Separate widgets
-- [ ] Performance check
+- [x] Support offline forecast(sembast).
+- [x] Dark/Light Theme(Rxdart).
+- [x] Dynamic Theme based on the weather condition(Rxdart).
+- [x] Handle exceptions.(very simple one)
 
 # Build
 
@@ -84,8 +72,9 @@ shared_preferences: # ^0.5.12
 font_awesome_flutter: # ^8.8.1
 weather_icons: # ^2.0.1
 flutter_svg: # ^0.19.0
+url_launcher: #^5.7.2
+google_fonts: # ^1.1.0
 ```yaml
-
 ```
 
 # Licenses

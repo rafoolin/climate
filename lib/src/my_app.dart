@@ -1,14 +1,13 @@
 import 'package:climate/src/blocs/blocs.dart';
 import 'package:climate/src/configs/configs.dart';
 import 'package:climate/src/pages/pages.dart';
-import 'package:climate/src/pages/timezone_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Only portrait orientation is acceptable
+    // Only portrait orientation is accepted
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -21,18 +20,26 @@ class MyApp extends StatelessWidget {
       ..fetchDistance()
       ..fetchPressure()
       ..fetchWind();
+    ForecastBloc forecastBloc = ForecastBloc(preferencesBloc: prefBloc);
     return BlocProvider(
       bloc: prefBloc,
       child: BlocProvider(
-        bloc: ForecastBloc(preferencesBloc: prefBloc),
+        bloc: forecastBloc,
         child: StreamBuilder(
-          stream: prefBloc.themeStream,
-          builder: (context, snapshot) {
-            return MaterialApp(
-              theme: snapshot.hasData
-                  ? snapshot.data ? darkTheme : lightTheme
-                  : lightTheme,
-              onGenerateRoute: _onGenerateRoute,
+          stream: forecastBloc.climateColorStream,
+          builder: (context, colorSnapshot) {
+            return StreamBuilder(
+              stream: prefBloc.themeStream,
+              builder: (context, snapshot) {
+                ThemeData theme = snapshot.hasData
+                    ? snapshot.data ? darkTheme : lightTheme
+                    : lightTheme;
+                return MaterialApp(
+                  // Color of accentColor matches the weather condition
+                  theme: theme.copyWith(accentColor: colorSnapshot.data),
+                  onGenerateRoute: _onGenerateRoute,
+                );
+              },
             );
           },
         ),

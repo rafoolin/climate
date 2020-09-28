@@ -35,7 +35,7 @@ class CustomLicensePage extends StatelessWidget {
             top: 0.0,
             left: 0.0,
             right: 0.0,
-            child: CustomAppBar(title: 'Licenses'),
+            child: const CustomAppBar(title: 'Licenses'),
           ),
         ],
       ),

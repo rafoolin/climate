@@ -12,9 +12,7 @@ class LocationPage extends StatefulWidget {
 
 class _LocationPageState extends State<LocationPage> {
   PreferencesBloc _preferencesBloc;
-  ThemeData _theme;
   List<String> _places;
-  bool _isDark = false;
   GlobalKey<ScaffoldState> _scaffoldKey;
 
   @override
@@ -28,8 +26,6 @@ class _LocationPageState extends State<LocationPage> {
   @override
   Widget build(BuildContext context) {
     print('location page');
-    _theme = Theme.of(context);
-    _isDark = _theme.brightness == Brightness.dark;
     return Scaffold(
       key: _scaffoldKey,
       body: CustomScrollView(
@@ -41,7 +37,7 @@ class _LocationPageState extends State<LocationPage> {
                 Tooltip(
                   message: 'Add new locations',
                   child: IconButton(
-                    icon: Icon(Icons.add),
+                    icon: Icon(Icons.add, color: Colors.white),
                     onPressed: () => Navigator.of(context)
                         .pushNamed(LocationConfigPage.routeName),
                   ),
@@ -58,7 +54,7 @@ class _LocationPageState extends State<LocationPage> {
                 style: Theme.of(context)
                     .textTheme
                     .bodyText2
-                    .copyWith(fontSize: 18.0),
+                    .copyWith(fontSize: 17.0),
               ),
             ),
           ),
@@ -70,7 +66,6 @@ class _LocationPageState extends State<LocationPage> {
   }
 
   Widget _locationList() {
-    print('location page1');
     return StreamBuilder<List<String>>(
       stream: _preferencesBloc.placesStream,
       builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
@@ -109,17 +104,17 @@ class _LocationPageState extends State<LocationPage> {
     return SnackBar(
       content: RichText(
         text: TextSpan(
-          style: _theme.textTheme.button.copyWith(
-            color: _isDark ? Colors.white70 : Colors.white,
-            fontWeight: FontWeight.w300,
-          ),
+          style: Theme.of(context).textTheme.button.copyWith(
+                fontSize: 12.0,
+                fontWeight: FontWeight.w200,
+              ),
           text: 'Set ',
           children: [
             TextSpan(
               text: '$location ',
               style: TextStyle(
                 color: Color(0xffe4ce0f),
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
             TextSpan(text: 'as current location!')
@@ -160,7 +155,10 @@ class DismissiblePlace extends StatelessWidget {
                     // If the current saved location is same as title,
                     // show a location icon beside the title.
                     currentLocation.compareTo(title) == 0
-                        ? Icon(Icons.my_location)
+                        ? Icon(
+                            Icons.my_location,
+                            color: Theme.of(context).accentColor,
+                          )
                         : null,
               ),
               onDismissed: (direction) async =>

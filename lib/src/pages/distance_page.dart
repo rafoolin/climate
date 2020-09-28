@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 class DistancePage extends StatelessWidget {
   static const String routeName = "/DistancePage";
+  const DistancePage();
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +13,7 @@ class DistancePage extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: CustomAppBar(title: 'Distance')),
+          SliverToBoxAdapter(child: const CustomAppBar(title: 'Distance')),
           SliverToBoxAdapter(
             child: ListView(
               shrinkWrap: true,

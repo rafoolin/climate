@@ -12,7 +12,7 @@ class WindPage extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: CustomAppBar(title: 'Wind Speed')),
+          SliverToBoxAdapter(child: const CustomAppBar(title: 'Wind Speed')),
           SliverToBoxAdapter(
             child: ListView(
               shrinkWrap: true,

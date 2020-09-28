@@ -12,7 +12,7 @@ class TempPage extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: CustomAppBar(title: 'Temperature')),
+          SliverToBoxAdapter(child:const CustomAppBar(title: 'Temperature')),
           SliverToBoxAdapter(
             child: ListView(
               shrinkWrap: true,

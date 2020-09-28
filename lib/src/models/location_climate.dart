@@ -33,14 +33,14 @@ class LocationClimate extends Object {
   LocationClimate.fromJson(Map<String, dynamic> json) {
     if (json['consolidated_weather'] != null) {
       consolidatedWeather = List<ConsolidatedWeather>();
-      DateTime now = DateTime.now();
-      DateTime today = DateTime(now.year, now.month, now.day);
+      // DateTime now = DateTime.now();
+      // DateTime today = DateTime.utc(now.year, now.month, now.day);
       json['consolidated_weather'].forEach(
         (forecast) {
           ConsolidatedWeather weather = ConsolidatedWeather.fromJson(forecast);
           // if (weather.applicableDate.isAfter(today) ||
           //     (weather.applicableDate.isAtSameMomentAs(today)))
-          consolidatedWeather.add(weather);
+            consolidatedWeather.add(weather);
         },
       );
     }

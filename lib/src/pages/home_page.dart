@@ -14,21 +14,20 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
 
-    return StreamBuilder<LocationClimate>(
-      stream: bloc.forecastStream,
-      builder: (BuildContext context, AsyncSnapshot<LocationClimate> snapshot) {
+    return StreamBuilder<ConsolidatedWeather>(
+      stream: bloc.todayForecastStream,
+      builder:
+          (BuildContext context, AsyncSnapshot<ConsolidatedWeather> snapshot) {
         if (snapshot.hasError) {
+          if (snapshot.error is EmptyLocationException) return EmptyPage();
           if (snapshot.error is NoInternetException)
             return ExceptionPage(exception: snapshot.error);
-          else if (snapshot.error is EmptyLocationException)
-            return EmptyPage();
-          else
-            return ExceptionPage(
-              exception: Exception('Sorry Some exception happened!'),
-            );
+          return ExceptionPage(
+            exception: Exception('Sorry something went wrong o _ O'),
+          );
         }
         return Scaffold(
-          drawer: CustomDrawer(),
+          drawer: const CustomDrawer(),
           body: CustomScrollView(
             slivers: [
               SliverPersistentHeader(
@@ -37,11 +36,11 @@ class HomePage extends StatelessWidget {
                     PersistHeader(height: MediaQuery.of(context).size.height),
                 pinned: true,
               ),
-              SliverToBoxAdapter(child: SizedBox(height: 16.0)),
+              SliverToBoxAdapter(child: const SizedBox(height: 16.0)),
               SliverToBoxAdapter(child: const WeatherStatus()),
-              SliverToBoxAdapter(child: SizedBox(height: 16.0)),
+              SliverToBoxAdapter(child: const SizedBox(height: 16.0)),
               SliverToBoxAdapter(child: const WeekForecast()),
-              SliverToBoxAdapter(child: SizedBox(height: 48.0)),
+              SliverToBoxAdapter(child: const SizedBox(height: 48.0)),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -50,17 +49,21 @@ class HomePage extends StatelessWidget {
                     style: Theme.of(context)
                         .textTheme
                         .headline4
-                        .copyWith(fontWeight: FontWeight.w500, fontSize: 30),
+                        .copyWith(fontWeight: FontWeight.w700, fontSize: 30),
                   ),
                 ),
               ),
               SliverToBoxAdapter(child: const ForecastDetails()),
-              SliverToBoxAdapter(child: SizedBox(height: 36.0)),
+              SliverToBoxAdapter(child: const SizedBox(height: 36.0)),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
                     'Sources',
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline4
+                        .copyWith(fontWeight: FontWeight.w700, fontSize: 30),
                   ),
                 ),
               ),

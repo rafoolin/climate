@@ -13,9 +13,8 @@ class EmptyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: CustomDrawer(),
+      drawer: const CustomDrawer(),
       appBar: AppBar(
-        elevation: 0.0,
         backgroundColor: CustomColor.defaultColor,
         actions: [
           Tooltip(
@@ -48,8 +47,14 @@ class EmptyPage extends StatelessWidget {
                 FlatButton.icon(
                   onPressed: () =>
                       Navigator.of(context).pushNamed(LocationPage.routeName),
-                  icon: Icon(FontAwesomeIcons.plus),
-                  label: Text('Add/Choose a Location'),
+                  icon: Icon(
+                    FontAwesomeIcons.plus,
+                    color: CustomColor.defaultColor,
+                  ),
+                  label: Text(
+                    'Add/Choose a Location',
+                    style: Theme.of(context).textTheme.bodyText1,
+                  ),
                 ),
               ],
             ),

@@ -12,7 +12,7 @@ class PressurePage extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: CustomAppBar(title: 'Pressure')),
+          SliverToBoxAdapter(child:const CustomAppBar(title: 'Pressure')),
           SliverToBoxAdapter(
             child: ListView(
               shrinkWrap: true,

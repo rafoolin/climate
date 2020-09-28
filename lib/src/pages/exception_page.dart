@@ -59,7 +59,6 @@ class _ExceptionPageState extends State<ExceptionPage>
       key: _scaffoldKey,
       drawer: CustomDrawer(),
       appBar: AppBar(
-        elevation: 0.0,
         backgroundColor: CustomColor.defaultColor,
         actions: [
           Tooltip(
@@ -97,7 +96,7 @@ class _ExceptionPageState extends State<ExceptionPage>
                       style: Theme.of(context).textTheme.headline6,
                     ),
                     icon: Icon(
-                      FontAwesomeIcons.sync,
+                      FontAwesomeIcons.redo,
                       color: CustomColor.defaultColor,
                     ),
                     onPressed: () async {
