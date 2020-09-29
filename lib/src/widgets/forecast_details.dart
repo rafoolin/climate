@@ -1,0 +1,691 @@
+import 'package:climate/src/blocs/blocs.dart';
+import 'package:climate/src/configs/custom_icons.dart';
+import 'package:climate/src/models/models.dart';
+import 'package:climate/src/utils/utils.dart';
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:weather_icons/weather_icons.dart';
+
+class ForecastDetails extends StatelessWidget {
+  const ForecastDetails();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetails');
+
+    return ListView(
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      children: [
+        // Fore better performance built each on a statelessWidget
+        const ForecastDetailLocation(),
+        const ForecastDetailLatLong(),
+        const ForecastDetailSunrise(),
+        const ForecastDetailSunset(),
+        const ForecastDetailTimezone(),
+        const ForecastDetailTimezoneName(),
+        const ForecastDetailWindSpeed(),
+        const ForecastDetailWindDir(),
+        const ForecastDetailWindDirCompass(),
+        const ForecastDetailHumidity(),
+        const ForecastDetailPressure(),
+        const ForecastDetailVisibility(),
+        const ForecastDetailConfidence(),
+      ],
+    );
+  }
+}
+
+// ----------------------------- ForecastDetailLocation -----------------------------
+class ForecastDetailLocation extends StatelessWidget {
+  const ForecastDetailLocation();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailLocation');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    return StreamBuilder<LocationClimate>(
+      stream: bloc.forecastStream,
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListTileTheme(
+              child: ListTile(
+                title: Text(
+                  'Location Type',
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle2
+                      .copyWith(fontSize: 12.0),
+                ),
+                subtitle: Text(
+                  snapshot.data.locationType,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyText2
+                      .copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+                ),
+                trailing: Icon(FontAwesomeIcons.city),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ----------------------------- ForecastDetailLatLong -----------------------------
+class ForecastDetailLatLong extends StatelessWidget {
+  const ForecastDetailLatLong();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailLatLong');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    return StreamBuilder<LocationClimate>(
+      stream: bloc.forecastStream,
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListTileTheme(
+              child: ListTile(
+                title: Text(
+                  'Latitude,Longitude',
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle2
+                      .copyWith(fontSize: 12.0),
+                ),
+                subtitle: Text(
+                  snapshot.data.lattLong,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyText2
+                      .copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+                ),
+                trailing: Icon(FontAwesomeIcons.directions, size: 26.0),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ----------------------------- ForecastDetailSunrise -----------------------------
+class ForecastDetailSunrise extends StatelessWidget {
+  const ForecastDetailSunrise();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailSunrise');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    return StreamBuilder<LocationClimate>(
+      stream: bloc.forecastStream,
+      builder: (context, forecastSnapshot) {
+        switch (forecastSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return StreamBuilder(
+              stream: prefBloc.timezoneStream,
+              builder:
+                  (context, AsyncSnapshot<TimezoneChoice> timezoneSnapshot) {
+                switch (timezoneSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    String date = DateFormat.Hms().format(
+                      // Sunrise in user desired timezone
+                      UnitConverter.timezoneConverter(
+                        offset: forecastSnapshot.data.offset,
+                        time: forecastSnapshot.data.sunRise,
+                        timezone: timezoneSnapshot.data,
+                      ),
+                    );
+                    // Timezone name
+                    String unit = UnitConverter.timezoneName(
+                      climateTimezoneName: forecastSnapshot.data.timezoneName,
+                      timezone: timezoneSnapshot.data,
+                    );
+                    return ListTileTheme(
+                      child: ListTile(
+                        title: Text(
+                          'Sunrise($unit)',
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle2
+                              .copyWith(fontSize: 12.0),
+                        ),
+                        subtitle: Text(
+                          date,
+                          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                              fontWeight: FontWeight.w500, fontSize: 16.0),
+                        ),
+                        trailing: Icon(WeatherIcons.sunrise, size: 26.0),
+                      ),
+                      iconColor: Theme.of(context).iconTheme.color,
+                    );
+                    break;
+                  default:
+                    return Container();
+                }
+              },
+            );
+
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ------------------------------ ForecastDetailSunset ------------------------------
+class ForecastDetailSunset extends StatelessWidget {
+  const ForecastDetailSunset();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailSunset');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    return StreamBuilder<LocationClimate>(
+      stream: bloc.forecastStream,
+      builder: (context, forecastSnapshot) {
+        switch (forecastSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return StreamBuilder(
+              stream: prefBloc.timezoneStream,
+              builder:
+                  (context, AsyncSnapshot<TimezoneChoice> timezoneSnapshot) {
+                switch (timezoneSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    String date = DateFormat.Hms().format(
+                      // Sunrise in user desired timezone
+                      UnitConverter.timezoneConverter(
+                        offset: forecastSnapshot.data.offset,
+                        time: forecastSnapshot.data.sunSet,
+                        timezone: timezoneSnapshot.data,
+                      ),
+                    );
+                    // Timezone name
+                    String unit = UnitConverter.timezoneName(
+                      climateTimezoneName: forecastSnapshot.data.timezoneName,
+                      timezone: timezoneSnapshot.data,
+                    );
+                    return ListTileTheme(
+                      child: ListTile(
+                        title: Text(
+                          'Sunset($unit)',
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle2
+                              .copyWith(fontSize: 12.0),
+                        ),
+                        subtitle: Text(
+                          date,
+                          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                              fontWeight: FontWeight.w500, fontSize: 16.0),
+                        ),
+                        trailing: Icon(WeatherIcons.sunset, size: 26.0),
+                      ),
+                      iconColor: Theme.of(context).iconTheme.color,
+                    );
+                    break;
+                  default:
+                    return Container();
+                }
+              },
+            );
+
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ----------------------------- ForecastDetailTimezone -----------------------------
+class ForecastDetailTimezone extends StatelessWidget {
+  const ForecastDetailTimezone();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailTimezone');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    return StreamBuilder<LocationClimate>(
+      stream: bloc.forecastStream,
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListTileTheme(
+              child: ListTile(
+                title: Text(
+                  'Timezone',
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle2
+                      .copyWith(fontSize: 12.0),
+                ),
+                subtitle: Text(
+                  snapshot.data.timezone,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyText2
+                      .copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+                ),
+                trailing: Icon(FontAwesomeIcons.globe),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// --------------------------- ForecastDetailTimezoneName ---------------------------
+class ForecastDetailTimezoneName extends StatelessWidget {
+  const ForecastDetailTimezoneName();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailTimezoneName');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    return StreamBuilder<String>(
+      stream: bloc.timezoneNameStream,
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListTileTheme(
+              child: ListTile(
+                title: Text(
+                  'Timezone Name',
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle2
+                      .copyWith(fontSize: 12.0),
+                ),
+                subtitle: Text(
+                  snapshot.data,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyText2
+                      .copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+                ),
+                trailing: Icon(FontAwesomeIcons.mapMarked),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
+            );
+
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ---------------------------- ForecastDetailWindSpeed ----------------------------
+class ForecastDetailWindSpeed extends StatelessWidget {
+  const ForecastDetailWindSpeed();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailWindSpeed');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    return StreamBuilder<ConsolidatedWeather>(
+      stream: bloc.todayForecastStream,
+      builder: (context, forecastSnapshot) {
+        switch (forecastSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return StreamBuilder(
+              stream: prefBloc.windStream,
+              builder: (context, AsyncSnapshot<WindUnit> windSnapshot) {
+                switch (windSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    // Wind saved unit
+                    String unit = UnitConverter.strUnit(windSnapshot.data);
+                    // Wind speed in user desired unit
+                    double wind = UnitConverter.windConverter(
+                      amount: forecastSnapshot.data.windSpeed,
+                      unit: windSnapshot.data,
+                    );
+                    return ListTileTheme(
+                      child: ListTile(
+                        title: Text(
+                          'Wind',
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle2
+                              .copyWith(fontSize: 12.0),
+                        ),
+                        subtitle: Text(
+                          '${wind.toStringAsFixed(2)} $unit',
+                          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                              fontWeight: FontWeight.w500, fontSize: 16.0),
+                        ),
+                        trailing: Icon(FontAwesomeIcons.wind),
+                      ),
+                      iconColor: Theme.of(context).iconTheme.color,
+                    );
+                    break;
+                  default:
+                    return Container();
+                }
+              },
+            );
+
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ----------------------------- ForecastDetailWindDir -----------------------------
+class ForecastDetailWindDir extends StatelessWidget {
+  const ForecastDetailWindDir();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailWindDir');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    return StreamBuilder<ConsolidatedWeather>(
+      stream: bloc.todayForecastStream,
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListTileTheme(
+              child: ListTile(
+                title: Text(
+                  'Wind Direction',
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle2
+                      .copyWith(fontSize: 12.0),
+                ),
+                subtitle: Text(
+                  '${snapshot.data.windDirection.toStringAsFixed(2)}°',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyText2
+                      .copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+                ),
+                trailing: Icon(CustomIcon.weathercock, size: 28.0),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// -------------------------- ForecastDetailWindDirCompass --------------------------
+class ForecastDetailWindDirCompass extends StatelessWidget {
+  const ForecastDetailWindDirCompass();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailWindDirCompass');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    return StreamBuilder<ConsolidatedWeather>(
+      stream: bloc.todayForecastStream,
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListTileTheme(
+              child: ListTile(
+                title: Text(
+                  'Wind Direction Compass',
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle2
+                      .copyWith(fontSize: 12.0),
+                ),
+                subtitle: Text(
+                  snapshot.data.windDirectionCompass,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyText2
+                      .copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+                ),
+                trailing: Icon(FontAwesomeIcons.compass, size: 26.0),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ----------------------------- ForecastDetailHumidity -----------------------------
+class ForecastDetailHumidity extends StatelessWidget {
+  const ForecastDetailHumidity();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailHumidity');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    return StreamBuilder<ConsolidatedWeather>(
+      stream: bloc.todayForecastStream,
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListTileTheme(
+              child: ListTile(
+                title: Text(
+                  'Humidity',
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle2
+                      .copyWith(fontSize: 12.0),
+                ),
+                subtitle: Text(
+                  '${snapshot.data.humidity}%',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyText2
+                      .copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+                ),
+                trailing: Icon(WeatherIcons.humidity, size: 30.0),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ---------------------------- ForecastDetailVisibility ----------------------------
+class ForecastDetailVisibility extends StatelessWidget {
+  const ForecastDetailVisibility();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailVisibility');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    return StreamBuilder<ConsolidatedWeather>(
+      stream: bloc.todayForecastStream,
+      builder: (context, forecastSnapshot) {
+        switch (forecastSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return StreamBuilder<DistanceUnit>(
+              stream: prefBloc.distanceStream,
+              builder: (context, distanceSnapshot) {
+                switch (distanceSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    // Length saved unit
+                    DistanceUnit unit = distanceSnapshot.data;
+                    // Length in user desired unit
+                    double distance = UnitConverter.distanceConverter(
+                      unit: unit,
+                      amount: forecastSnapshot.data.visibility,
+                    );
+                    return ListTileTheme(
+                      child: ListTile(
+                        title: Text(
+                          'Visibility',
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle2
+                              .copyWith(fontSize: 12.0),
+                        ),
+                        subtitle: Text(
+                          '${distance.toStringAsFixed(2)} ${UnitConverter.strUnit(unit)}',
+                          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                              fontWeight: FontWeight.w500, fontSize: 16.0),
+                        ),
+                        trailing: Icon(FontAwesomeIcons.eye),
+                      ),
+                      iconColor: Theme.of(context).iconTheme.color,
+                    );
+                    break;
+                  default:
+                    return Container();
+                }
+              },
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ----------------------------- ForecastDetailPressure -----------------------------
+class ForecastDetailPressure extends StatelessWidget {
+  const ForecastDetailPressure();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailPressure');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    return StreamBuilder<ConsolidatedWeather>(
+      stream: bloc.todayForecastStream,
+      builder: (context, forecastSnapshot) {
+        switch (forecastSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return StreamBuilder(
+              stream: prefBloc.pressureStream,
+              builder: (context, AsyncSnapshot<PressureUnit> pressureSnapshot) {
+                switch (pressureSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    // Pressure saved unit
+                    PressureUnit unit = pressureSnapshot.data;
+                    // Pressure in user desired unit
+                    double pressure = UnitConverter.pressureConverter(
+                      amount: forecastSnapshot.data.airPressure,
+                      unit: unit,
+                    );
+                    return ListTileTheme(
+                      child: ListTile(
+                        title: Text(
+                          'Air Pressure',
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle2
+                              .copyWith(fontSize: 12.0),
+                        ),
+                        subtitle: Text(
+                          '${pressure.toStringAsFixed(2)} ${UnitConverter.strUnit(unit)}',
+                          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                              fontWeight: FontWeight.w500, fontSize: 16.0),
+                        ),
+                        trailing: Icon(CustomIcon.gauge, size: 30.0),
+                      ),
+                      iconColor: Theme.of(context).iconTheme.color,
+                    );
+                    break;
+                  default:
+                    return Container();
+                }
+              },
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ---------------------------- ForecastDetailConfidence ----------------------------
+class ForecastDetailConfidence extends StatelessWidget {
+  const ForecastDetailConfidence();
+  @override
+  Widget build(BuildContext context) {
+    print('ForecastDetailConfidence');
+    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    return StreamBuilder<ConsolidatedWeather>(
+      stream: bloc.todayForecastStream,
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListTileTheme(
+              child: ListTile(
+                title: Text(
+                  'Confidence',
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle2
+                      .copyWith(fontSize: 12.0),
+                ),
+                subtitle: Text(
+                  '${snapshot.data.predictability}%',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyText2
+                      .copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+                ),
+                trailing: Icon(CustomIcon.ball, size: 30.0),
+              ),
+              iconColor: Theme.of(context).iconTheme.color,
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
