@@ -11,6 +11,7 @@ class UnitConverter {
   /// Convert [amount] from centigrade to [unit].
   /// centigrade is the API default unit.
   static double tempConverter({TempUnit unit, double amount}) {
+    if (amount == null) return null;
     switch (unit) {
       //  (x°C × 9/5) + 32 = y°F
       case TempUnit.F:
@@ -28,6 +29,7 @@ class UnitConverter {
   /// Convert [amount] from mph to [unit].
   /// mph is the API default unit.
   static double windConverter({WindUnit unit, double amount}) {
+    if (amount == null) return null;
     switch (unit) {
       case WindUnit.KPH:
         return amount * 1.609;
@@ -43,6 +45,7 @@ class UnitConverter {
   /// Convert [amount] from mbar to [unit].
   /// mbar is the API default unit.
   static double pressureConverter({PressureUnit unit, double amount}) {
+    if (amount == null) return null;
     switch (unit) {
       case PressureUnit.PA:
         return amount * 100;
@@ -58,6 +61,7 @@ class UnitConverter {
   /// Convert [amount] from miles to [unit].
   /// miles is the API default unit.
   static double distanceConverter({DistanceUnit unit, double amount}) {
+    if (amount == null) return null;
     switch (unit) {
       case DistanceUnit.FOOT:
         return amount * 5280;
@@ -80,6 +84,8 @@ class UnitConverter {
     DateTime time,
     Duration offset,
   }) {
+    if (time == null) return null;
+
     // Local timezone
     switch (timezone) {
       case TimezoneChoice.USER:

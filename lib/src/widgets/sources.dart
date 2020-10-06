@@ -17,7 +17,7 @@ class Sources extends StatelessWidget {
         switch (snapshot.connectionState) {
           case ConnectionState.active:
           case ConnectionState.done:
-            List<Source> sources = snapshot.data.sources;
+            List<Source> sources = snapshot.data?.sources ?? [];
             return ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),

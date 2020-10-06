@@ -34,7 +34,7 @@ class WeatherStatus extends StatelessWidget {
                         // Temp in user desired unit
                         double temp = UnitConverter.tempConverter(
                           unit: unit,
-                          amount: forecastSnapshot.data.theTemp,
+                          amount: forecastSnapshot.data?.theTemp,
                         );
                         // Temp unit in weather condition Color
                         return StreamBuilder<Color>(
@@ -53,7 +53,11 @@ class WeatherStatus extends StatelessWidget {
                                           : Colors.black87,
                                       fontWeight: FontWeight.bold,
                                     ),
-                                    text: '${temp.floor()}',
+                                    text:
+                                        // temp is null
+                                        (forecastSnapshot.data?.theTemp == null)
+                                            ? 'NaN'
+                                            : '${temp.floor()}',
                                     children: [
                                       TextSpan(
                                         text: unit == TempUnit.K

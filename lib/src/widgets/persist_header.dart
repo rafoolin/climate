@@ -231,13 +231,17 @@ class PersistHeaderWide extends StatelessWidget {
                       switch (snapshot.connectionState) {
                         case ConnectionState.active:
                         case ConnectionState.done:
-                          String svgFile =
-                              snapshot.data.weatherStateName.split(' ').join();
+                          String svgFile = snapshot.data?.weatherStateName
+                              ?.split(' ')
+                              ?.join();
                           return Container(
                             alignment: Alignment.center,
                             padding: EdgeInsets.only(top: 16.0),
                             child: SvgPicture.asset(
-                                'assets/img/climate_status/$svgFile.svg'),
+                              (svgFile == null)
+                                  ? 'assets/img/climate_status/NaN.svg'
+                                  : 'assets/img/climate_status/$svgFile.svg',
+                            ),
                           );
                           break;
                         default:
@@ -351,12 +355,15 @@ class PersistHeaderNarrow extends StatelessWidget {
                       switch (snapshot.connectionState) {
                         case ConnectionState.active:
                         case ConnectionState.done:
-                          String svgFile =
-                              snapshot.data.weatherStateName.split(' ').join();
+                          String svgFile = snapshot.data?.weatherStateName
+                              ?.split(' ')
+                              ?.join();
                           return Container(
                             alignment: Alignment.centerRight,
                             child: SvgPicture.asset(
-                              'assets/img/climate_status/$svgFile.svg',
+                              (svgFile == null)
+                                  ? 'assets/img/climate_status/NaN.svg'
+                                  : 'assets/img/climate_status/$svgFile.svg',
                               fit: BoxFit.contain,
                               alignment: Alignment.centerRight,
                             ),
@@ -394,7 +401,6 @@ class PersistHeaderLastUpdate extends StatelessWidget {
           case ConnectionState.active:
           case ConnectionState.done:
             DateTime time = climateSnapshot.data.created;
-
             return SizedBox(
               height: 24.0,
               width: MediaQuery.of(context).size.width / 2,
@@ -422,7 +428,6 @@ class PersistHeaderLastUpdate extends StatelessWidget {
     String hourStr(int hours) => hours > 1 ? 'hours' : 'hour';
     String secondStr(int seconds) => seconds > 1 ? 'seconds' : 'second';
 
-    time = time.toUtc();
     DateTime now = DateTime.now().toUtc();
     Duration diff = now.difference(time.toUtc());
     int days = diff.inDays;

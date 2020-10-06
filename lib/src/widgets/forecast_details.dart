@@ -209,14 +209,18 @@ class ForecastDetailSunset extends StatelessWidget {
                 switch (timezoneSnapshot.connectionState) {
                   case ConnectionState.active:
                   case ConnectionState.done:
-                    String date = DateFormat.Hms().format(
-                      // Sunrise in user desired timezone
-                      UnitConverter.timezoneConverter(
-                        offset: forecastSnapshot.data.offset,
-                        time: forecastSnapshot.data.sunSet,
-                        timezone: timezoneSnapshot.data,
-                      ),
-                    );
+                    String date =
+                        // Sunrise is null
+                        (forecastSnapshot.data?.sunSet == null)
+                            ? null
+                            : DateFormat.Hms().format(
+                                // Sunrise in user desired timezone
+                                UnitConverter.timezoneConverter(
+                                  offset: forecastSnapshot.data.offset,
+                                  time: forecastSnapshot.data.sunSet,
+                                  timezone: timezoneSnapshot.data,
+                                ),
+                              );
                     // Timezone name
                     String unit = UnitConverter.timezoneName(
                       climateTimezoneName: forecastSnapshot.data.timezoneName,
@@ -232,7 +236,7 @@ class ForecastDetailSunset extends StatelessWidget {
                               .copyWith(fontSize: 12.0),
                         ),
                         subtitle: Text(
-                          date,
+                          date ?? 'NaN',
                           style: Theme.of(context).textTheme.bodyText2.copyWith(
                               fontWeight: FontWeight.w500, fontSize: 16.0),
                         ),
@@ -279,7 +283,7 @@ class ForecastDetailTimezone extends StatelessWidget {
                       .copyWith(fontSize: 12.0),
                 ),
                 subtitle: Text(
-                  snapshot.data.timezone,
+                  snapshot.data?.timezone ?? 'NaN',
                   style: Theme.of(context)
                       .textTheme
                       .bodyText2
@@ -363,9 +367,9 @@ class ForecastDetailWindSpeed extends StatelessWidget {
                   case ConnectionState.done:
                     // Wind saved unit
                     String unit = UnitConverter.strUnit(windSnapshot.data);
-                    // Wind speed in user desired unit
+                    // Wind speed in user desired unit, can be null
                     double wind = UnitConverter.windConverter(
-                      amount: forecastSnapshot.data.windSpeed,
+                      amount: forecastSnapshot.data?.windSpeed,
                       unit: windSnapshot.data,
                     );
                     return ListTileTheme(
@@ -378,7 +382,10 @@ class ForecastDetailWindSpeed extends StatelessWidget {
                               .copyWith(fontSize: 12.0),
                         ),
                         subtitle: Text(
-                          '${wind.toStringAsFixed(2)} $unit',
+                          // wind speed is null
+                          (wind == null)
+                              ? 'NaN'
+                              : '${wind.toStringAsFixed(2)} $unit',
                           style: Theme.of(context).textTheme.bodyText2.copyWith(
                               fontWeight: FontWeight.w500, fontSize: 16.0),
                         ),
@@ -425,7 +432,10 @@ class ForecastDetailWindDir extends StatelessWidget {
                       .copyWith(fontSize: 12.0),
                 ),
                 subtitle: Text(
-                  '${snapshot.data.windDirection.toStringAsFixed(2)}°',
+                  // wind direction is null
+                  (snapshot.data?.windDirection == null)
+                      ? 'NaN'
+                      : '${snapshot.data.windDirection.toStringAsFixed(2)}°',
                   style: Theme.of(context)
                       .textTheme
                       .bodyText2
@@ -467,7 +477,8 @@ class ForecastDetailWindDirCompass extends StatelessWidget {
                       .copyWith(fontSize: 12.0),
                 ),
                 subtitle: Text(
-                  snapshot.data.windDirectionCompass,
+                  // wind compass is null
+                  snapshot.data?.windDirectionCompass ?? 'NaN',
                   style: Theme.of(context)
                       .textTheme
                       .bodyText2
@@ -509,7 +520,10 @@ class ForecastDetailHumidity extends StatelessWidget {
                       .copyWith(fontSize: 12.0),
                 ),
                 subtitle: Text(
-                  '${snapshot.data.humidity}%',
+                  // Humidity is null
+                  (snapshot.data?.humidity == null)
+                      ? 'NaN'
+                      : '${snapshot.data.humidity}%',
                   style: Theme.of(context)
                       .textTheme
                       .bodyText2
@@ -550,10 +564,10 @@ class ForecastDetailVisibility extends StatelessWidget {
                   case ConnectionState.done:
                     // Length saved unit
                     DistanceUnit unit = distanceSnapshot.data;
-                    // Length in user desired unit
+                    // Length in user desired unit, can be null
                     double distance = UnitConverter.distanceConverter(
                       unit: unit,
-                      amount: forecastSnapshot.data.visibility,
+                      amount: forecastSnapshot.data?.visibility,
                     );
                     return ListTileTheme(
                       child: ListTile(
@@ -565,7 +579,10 @@ class ForecastDetailVisibility extends StatelessWidget {
                               .copyWith(fontSize: 12.0),
                         ),
                         subtitle: Text(
-                          '${distance.toStringAsFixed(2)} ${UnitConverter.strUnit(unit)}',
+                          // Visibility is null
+                          (forecastSnapshot.data?.visibility == null)
+                              ? 'NaN'
+                              : '${distance.toStringAsFixed(2)} ${UnitConverter.strUnit(unit)}',
                           style: Theme.of(context).textTheme.bodyText2.copyWith(
                               fontWeight: FontWeight.w500, fontSize: 16.0),
                         ),
@@ -610,9 +627,9 @@ class ForecastDetailPressure extends StatelessWidget {
                   case ConnectionState.done:
                     // Pressure saved unit
                     PressureUnit unit = pressureSnapshot.data;
-                    // Pressure in user desired unit
+                    // Pressure in user desired unit, can be null
                     double pressure = UnitConverter.pressureConverter(
-                      amount: forecastSnapshot.data.airPressure,
+                      amount: forecastSnapshot.data?.airPressure,
                       unit: unit,
                     );
                     return ListTileTheme(
@@ -625,7 +642,10 @@ class ForecastDetailPressure extends StatelessWidget {
                               .copyWith(fontSize: 12.0),
                         ),
                         subtitle: Text(
-                          '${pressure.toStringAsFixed(2)} ${UnitConverter.strUnit(unit)}',
+                          // Pressure is null
+                          (pressure == null)
+                              ? 'NaN'
+                              : '${pressure.toStringAsFixed(2)} ${UnitConverter.strUnit(unit)}',
                           style: Theme.of(context).textTheme.bodyText2.copyWith(
                               fontWeight: FontWeight.w500, fontSize: 16.0),
                         ),
@@ -671,7 +691,10 @@ class ForecastDetailConfidence extends StatelessWidget {
                       .copyWith(fontSize: 12.0),
                 ),
                 subtitle: Text(
-                  '${snapshot.data.predictability}%',
+                  // predictability is null
+                  (snapshot.data?.predictability == null)
+                      ? 'NaN'
+                      : '${snapshot.data.predictability}%',
                   style: Theme.of(context)
                       .textTheme
                       .bodyText2
