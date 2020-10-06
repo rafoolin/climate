@@ -160,7 +160,7 @@ class TempTile extends StatelessWidget {
   Widget build(BuildContext context) {
     print('TempTile');
     PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
-    TempUnit unit;
+    String unit;
     return StreamBuilder<TempUnit>(
       stream: bloc.tempStream,
       builder: (
@@ -170,7 +170,7 @@ class TempTile extends StatelessWidget {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
           case ConnectionState.active:
-            unit = snapshot.data;
+            unit = UnitConverter.strUnit(snapshot.data).toUpperCase();
             return ListTileTheme(
               child: ListTile(
                 title: Text('Temperature'),
@@ -178,8 +178,8 @@ class TempTile extends StatelessWidget {
                   WeatherIcons.thermometer,
                 ),
                 subtitle: snapshot.data == TempUnit.K
-                    ? Text('${UnitConverter.strUnit(unit)}')
-                    : Text('°${UnitConverter.strUnit(unit)}'),
+                    ? Text('$unit')
+                    : Text('°$unit'),
                 onTap: () async =>
                     await Navigator.of(context).pushNamed(TempPage.routeName),
               ),
