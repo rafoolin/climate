@@ -61,6 +61,7 @@ flutter:
     - assets/img/climate_status/HeavyCloud.svg
     - assets/img/climate_status/LightCloud.svg
     - assets/img/climate_status/Clear.svg
+    - assets/img/climate_status/NaN.svg
 
     # more
     - assets/img/climate_status/Fog.svg

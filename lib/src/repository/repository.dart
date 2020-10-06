@@ -4,6 +4,7 @@ import 'package:climate/src/exceptions/exceptions.dart';
 import 'package:climate/src/models/models.dart';
 import 'package:climate/src/repository/repositories.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class Repository {
   // API direct connection
@@ -11,6 +12,7 @@ class Repository {
 
   // database's Objects
   LocationClimateDao _climateDao = LocationClimateDao();
+  ConsolidatedWeatherDao _weatherDao = ConsolidatedWeatherDao();
   LocationDao _locationDao = LocationDao();
 
   // ------------------------------------ LOCATION ------------------------------------
@@ -39,7 +41,7 @@ class Repository {
       // so fetch climate from database
       return await _climateDao.location(woeid: woeid).then(
             (climate) => (climate == null)
-                // If climate for [woeid] can't fetch neither from API
+                // If climate for [woeid] can't be fetched neither from API
                 // nor from database, throws error
                 ? throw NoInternetException(
                     'Need internet connection to get climate info!')
@@ -103,21 +105,42 @@ class Repository {
   /// Examples:
   /// --
   /// ```dart
-  /// // London on a 27th Apr 2013
+  /// // London on 27th Apr 2013
   /// locationDay(woeid:44418, date: DateTime.parse(2013-4-27));
   /// // San Francisco on 30th April 2013
   /// locationDay(woeid:2487956, date: DateTime.parse(2013-4-30));
   /// ```
 
-  Future<LocationClimate> locationDay({
+  Future<ConsolidatedWeather> locationDay({
     @required int woeid,
     @required DateTime date,
   }) async {
-    return _api.locationDay(woeid: woeid, date: date);
+    try {
+      // Fetch forecast from API in [date]
+      return await _api
+          .locationDay(woeid: woeid, date: date)
+          // No error occurred, so save/update weather on the database
+          .then(
+            (weather) async => await _weatherDao
+                .insertOrUpdate(woeid: woeid, weather: weather)
+                .then((value) => weather),
+          );
+    } on SocketException catch (_) {
+      // There is a problem with the internet
+      // so fetch weather from database
+      return await _weatherDao.locationDay(woeid: woeid, date: date).then(
+            (weather) => (weather == null)
+                // If weather for [woeid] in [date] couldn't be found neither from API
+                // nor from database, throws an error
+                ? throw NoInternetException(
+                    'Need internet connection to get climate info!')
+                : weather,
+          );
+    }
   }
 
-  /// Clear all saved climates from the Climate Table(Store).
-  Future<int> clearClimates() {
-    return _climateDao.clear();
+  /// Clear all saved climates from the Climate Table(Store) and weather store.
+  Future<int> clearClimates() async {
+    return _weatherDao.clear().then((value) async => await _climateDao.clear());
   }
 }

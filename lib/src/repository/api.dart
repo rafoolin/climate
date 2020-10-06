@@ -93,20 +93,23 @@ class Api {
   /// Examples:
   /// --
   /// ```dart
-  /// // London on a 27th Apr 2013
+  /// // London on 27th Apr 2013
   /// locationDay(woeid:44418, date: DateTime.parse(2013-4-27));
   /// // San Francisco on 30th April 2013
   /// locationDay(woeid:2487956, date: DateTime.parse(2013-4-30));
   /// ```
-  Future<LocationClimate> locationDay({
+  Future<ConsolidatedWeather> locationDay({
     @required int woeid,
     @required DateTime date,
   }) async {
-    var response = await http.get('$baseUrl/location/$woeid/');
+    String path =
+        '$baseUrl/location/$woeid/${date.year}/${date.month}/${date.day}/';
+    var response = await http.get(path);
     if (response.statusCode == 200) {
-      var result = json.decode(response.body);
-      return LocationClimate.fromJson(result);
+      List result = json.decode(response.body);
+      // Most recent weather info
+      return ConsolidatedWeather.fromJson(result.first);
     }
-    throw Exception('Failed to fetch weather on this date!');
+    throw null;
   }
 }

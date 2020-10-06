@@ -162,7 +162,9 @@ class PersistHeaderWide extends StatelessWidget {
           case ConnectionState.active:
           case ConnectionState.done:
             LocationClimate climate = snapshot.data;
-
+            print('object');
+            print(climate.sunRise);
+            print(climate.sunRise.toIso8601String());
             return Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -206,7 +208,8 @@ class PersistHeaderWide extends StatelessWidget {
                               child: FittedBox(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  DateFormat.yMd().format(climate.time),
+                                  DateFormat.yMd()
+                                      .format(climate.time.add(climate.offset)),
                                   style: Theme.of(context)
                                       .textTheme
                                       .caption
@@ -329,7 +332,8 @@ class PersistHeaderNarrow extends StatelessWidget {
                                 child: FittedBox(
                                   alignment: Alignment.topLeft,
                                   child: Text(
-                                    DateFormat.yMd().format(climate.time),
+                                    DateFormat.yMd().format(
+                                        climate.time.add(climate.offset)),
                                     style: Theme.of(context)
                                         .textTheme
                                         .caption

@@ -164,22 +164,29 @@ class ForecastBloc extends Bloc {
     DateTime now = DateTime.now();
     // Today without  hours, minutes and seconds in UTC
     DateTime today = DateTime.utc(now.year, now.month, now.day);
-    // From 6 forecast get the [today] one.
-    ConsolidatedWeather todayForecast = climate.consolidatedWeather.firstWhere(
-      (forecast) => forecast.applicableDate.isAtSameMomentAs(today),
-      orElse: () {
-        Exception exception =
-            Exception('Nothing found! Connect to the internet to get updates');
-        _todayForecast.addError(exception);
-        _forecastColor.add(CustomColor.defaultColor);
-        return null;
-      },
-    );
-    if (todayForecast != null) {
-      _todayForecast.add(todayForecast);
-      _forecastColor.add(CustomColor.weatherStateColor(
-          weatherStateAbbr: todayForecast.weatherStateAbbr));
+    List<ConsolidatedWeather> climates = climate.consolidatedWeather;
+
+    for (var i = 0; i < climates.length; i++) {
+      // First date equals today
+      if (climates[i].applicableDate.isAtSameMomentAs(today)) {
+        _todayForecast.add(climates[i]);
+        _forecastColor.add(CustomColor.weatherStateColor(
+            weatherStateAbbr: climates[i].weatherStateAbbr));
+        return;
+      }
     }
+
+    // NO data found for today, fetch explicitly weather for today
+    await _repository
+        .locationDay(woeid: climate.woeid, date: today)
+        .then((fetched) {
+      _todayForecast.add(fetched);
+      _forecastColor.add(CustomColor.weatherStateColor(
+          weatherStateAbbr: fetched.weatherStateAbbr));
+    }).catchError((onError) {
+      _todayForecast.addError(onError);
+      _forecastColor.add(CustomColor.defaultColor);
+    });
   }
 
   /// Dispose streams
