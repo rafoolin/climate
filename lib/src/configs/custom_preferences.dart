@@ -105,7 +105,7 @@ class CustomPreferences {
   /// save places Preference
   Future<bool> savePlacesPreference({List<String> names}) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    return pref.setStringList(placesKey, names);
+    return pref.setStringList(placesKey, names.toSet().toList());
   }
 
   /// fetch Places Preference

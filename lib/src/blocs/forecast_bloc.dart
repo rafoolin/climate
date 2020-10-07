@@ -42,7 +42,8 @@ class ForecastBloc extends Bloc {
     // Fetch saved places
     CustomPreferences pref = CustomPreferences();
     List<String> places = await pref.fetchPlacesPreference();
-    _searchResult = HashMap<String, bool>();
+    // Used insertion-ordered hash-table to match the API returned order
+    _searchResult = LinkedHashMap<String, bool>();
 
     // Fetch Location model of each saved places
     await _repository

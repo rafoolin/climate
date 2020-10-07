@@ -35,7 +35,12 @@ class LocationDao {
     Database db = await DB.instance.database;
     var result = await _store.find(
       db,
-      finder: Finder(filter: Filter.matches('title', query)),
+      finder: Finder(
+        filter: Filter.matchesRegExp(
+          'title',
+          RegExp(query, caseSensitive: false),
+        ),
+      ),
     );
 
     return result.map((e) => Location.fromJson(e.value)).toList();
