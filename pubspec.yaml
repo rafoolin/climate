@@ -33,7 +33,7 @@ dependencies:
   weather_icons: # ^2.0.1
   flutter_svg: # ^0.19.0
   url_launcher: #^5.7.2
-  google_fonts: # ^1.1.0
+
 
 dev_dependencies:
   flutter_test:
@@ -85,6 +85,43 @@ flutter:
       fonts:
         - asset: assets/fonts/CustomIcon.ttf
           style: normal
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/noto_sans/NotoSans-Thin.ttf
+          style: normal
+          weight: 100
+
+        - asset: assets/fonts/noto_sans/NotoSans-ExtraLight.ttf
+          style: normal
+          weight: 200
+
+        - asset: assets/fonts/noto_sans/NotoSans-Light.ttf
+          style: normal
+          weight: 300
+
+        - asset: assets/fonts/noto_sans/NotoSans-Regular.ttf
+          style: normal
+          weight: 400
+
+        - asset: assets/fonts/noto_sans/NotoSans-Medium.ttf
+          style: normal
+          weight: 500
+
+        - asset: assets/fonts/noto_sans/NotoSans-SemiBold.ttf
+          style: normal
+          weight: 600
+
+        - asset: assets/fonts/noto_sans/NotoSans-Bold.ttf
+          style: normal
+          weight: 700
+
+        - asset: assets/fonts/noto_sans/NotoSans-ExtraBold.ttf
+          style: normal
+          weight: 800
+
+        - asset: assets/fonts/noto_sans/NotoSans-Black.ttf
+          style: normal
+          weight: 900
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
