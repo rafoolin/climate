@@ -66,20 +66,16 @@ class ForecastBloc extends Bloc {
     // fetch saved places
     CustomPreferences _pref = CustomPreferences();
     List<String> places = await _pref.fetchPlacesPreference();
-
     if (chosen)
       places.add(title);
     else
       places.remove(title);
-
     // Apply updates to caches
     _cachePlaces[title] = chosen;
     _searchResult[title] = chosen;
     // Inform Pref bloc to update any changes in saved places
-    await preferencesBloc.savePlaces(names: places);
-    await _pref
-        // Save places to SharedPreference
-        .savePlacesPreference(names: places)
+    await preferencesBloc
+        .savePlaces(names: places.toSet().toList())
         // Update search bloc result
         .then((value) => _locations.add(_searchResult))
         .catchError((onError) => _locations.addError(onError));
@@ -161,7 +157,7 @@ class ForecastBloc extends Bloc {
   get todayForecastStream => _todayForecast.stream;
 
   void _catchTodayForecast({LocationClimate climate}) async {
-    //  Time in location timezone
+    //  Time in user local timezone
     DateTime now = DateTime.now();
     // Today without  hours, minutes and seconds in UTC
     DateTime today = DateTime.utc(now.year, now.month, now.day);
@@ -182,6 +178,39 @@ class ForecastBloc extends Bloc {
         .locationDay(woeid: climate.woeid, date: today)
         .then((fetched) {
       _todayForecast.add(fetched);
+      /* 
+         In cases that the local date is one day(actually a few hours) 
+         before the UTC time:
+         for example UTC is OCt 9, 2020
+         and the user local date is Oct 8, 2020(a few hours to Oct 9)
+         in these situations I decided to fetch Oct 8 for the user.
+         
+         In API it only returns [ConsolidatedWeather] for that date
+         So for other info like sunrise, sunset,..
+         I had to pass null.
+
+         API approach is that it shows oct 9, climate for user as today even if
+         in user timezone(or location timezone) is oct 8.
+
+      */
+      // Add this date to remaining dates
+      _forecast.add(
+        LocationClimate(
+          consolidatedWeather: [fetched] + climate.consolidatedWeather,
+          lattLong: climate.lattLong,
+          locationType: climate.locationType,
+          parent: climate.parent,
+          sources: climate.sources,
+          sunRise: null,
+          sunSet: null,
+          time: null,
+          timeStr: climate.timeStr,
+          timezone: climate.timezone,
+          timezoneName: climate.timezoneName,
+          title: climate.title,
+          woeid: climate.woeid,
+        ),
+      );
       _forecastColor.add(CustomColor.weatherStateColor(
           weatherStateAbbr: fetched.weatherStateAbbr));
     }).catchError((onError) {

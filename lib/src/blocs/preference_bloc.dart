@@ -2,11 +2,12 @@ import 'package:climate/src/blocs/blocs.dart';
 import 'package:climate/src/configs/configs.dart';
 import 'package:climate/src/models/models.dart';
 import 'package:climate/src/utils/utils.dart';
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 class PreferencesBloc extends Bloc {
   final CustomPreferences _pref = CustomPreferences();
-  final _theme = BehaviorSubject<bool>();
+  final _theme = BehaviorSubject<ThemeData>();
   final _location = BehaviorSubject<String>();
   final _temp = BehaviorSubject<TempUnit>();
   final _wind = BehaviorSubject<WindUnit>();
@@ -26,14 +27,14 @@ class PreferencesBloc extends Bloc {
   Future<void> fetchTheme() async {
     await _pref
         .fetchThemePreference()
-        .then((value) => _theme.add(value))
+        .then((value) => _theme.add(value ? darkTheme : lightTheme))
         .catchError((onError) => _theme.addError(onError));
   }
 
   Future<void> saveTheme({bool isDark = false}) async {
     await _pref
         .saveThemePreference(isDark: isDark)
-        .then((value) => _theme.add(isDark))
+        .then((value) => _theme.add(isDark ? darkTheme : lightTheme))
         .catchError((onError) => _theme.addError(onError));
   }
 
