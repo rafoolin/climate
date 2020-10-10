@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class Skeleton extends StatefulWidget {
   final double width, height;
-
   const Skeleton({Key key, this.width, this.height}) : super(key: key);
   @override
   _SkeletonState createState() => _SkeletonState();
@@ -12,8 +11,6 @@ class _SkeletonState extends State<Skeleton>
     with SingleTickerProviderStateMixin {
   AnimationController _animationController;
   Animation<double> _animation;
-  bool _isDark = false;
-
   @override
   void initState() {
     _animationController =
@@ -26,21 +23,18 @@ class _SkeletonState extends State<Skeleton>
         curve: Curves.linear,
       ),
     );
-
     _animationController.repeat();
-
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: widget.width,
       height: widget.height,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: _isDark
+          colors: Theme.of(context).brightness == Brightness.dark
               ? [Colors.white12, Colors.white24, Colors.white12]
               : [Colors.black12, Colors.black26, Colors.black12],
           begin: Alignment(_animation.value, 0),

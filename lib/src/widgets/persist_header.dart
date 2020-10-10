@@ -29,7 +29,6 @@ class PersistHeader extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    print('PersistHeader');
     double top = MediaQuery.of(context).padding.top;
     return Stack(
       children: [
@@ -86,10 +85,9 @@ class PersistHeaderBg extends StatelessWidget {
   const PersistHeaderBg();
   @override
   Widget build(BuildContext context) {
-    print('PersistHeaderBg');
+    // print('PersistHeaderBg');
     ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
-
-    return StreamBuilder(
+    return StreamBuilder<Color>(
       stream: bloc.climateColorStream,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
@@ -116,10 +114,10 @@ class PersistHeaderAppBar extends StatelessWidget {
   const PersistHeaderAppBar();
   @override
   Widget build(BuildContext context) {
-    print('PersistHeaderAppBar');
+    // print('PersistHeaderAppBar');
     ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
 
-    return StreamBuilder(
+    return StreamBuilder<Color>(
       stream: bloc.climateColorStream,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
@@ -152,19 +150,17 @@ class PersistHeaderWide extends StatelessWidget {
   const PersistHeaderWide({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    print('PersistHeaderWide');
-    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    // print('PersistHeaderWide');
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    ForecastBloc forecastBloc = BlocProvider.of<ForecastBloc>(context);
 
     return StreamBuilder<LocationClimate>(
-      stream: bloc.forecastStream,
+      stream: forecastBloc.forecastStream,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.active:
           case ConnectionState.done:
             LocationClimate climate = snapshot.data;
-            print('object');
-            print(climate.sunRise);
-            print(climate.sunRise.toIso8601String());
             return Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -185,42 +181,55 @@ class PersistHeaderWide extends StatelessWidget {
                       ),
                       Flexible(
                         flex: 3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: FittedBox(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  climate.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headline4
-                                      .copyWith(
-                                        color: Colors.white,
+                        child: StreamBuilder<ThemeData>(
+                          stream: prefBloc.themeStream,
+                          builder: (context, themeSnapshot) {
+                            switch (themeSnapshot.connectionState) {
+                              case ConnectionState.active:
+                              case ConnectionState.done:
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: FittedBox(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          climate.title,
+                                          style: themeSnapshot
+                                              .data.textTheme.headline4
+                                              .copyWith(
+                                            color: Colors.white,
+                                          ),
+                                        ),
                                       ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: FittedBox(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  DateFormat.yMd()
-                                      .format(climate.time.add(climate.offset)),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .caption
-                                      .copyWith(
-                                        color: Colors.white54,
-                                        fontWeight: FontWeight.w300,
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: FittedBox(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          (climate.time == null)
+                                              ? 'NaN'
+                                              : DateFormat.yMd().format(climate
+                                                  .time
+                                                  ?.add(climate.offset)),
+                                          style: themeSnapshot
+                                              .data.textTheme.caption
+                                              .copyWith(
+                                            color: Colors.white54,
+                                            fontWeight: FontWeight.w300,
+                                          ),
+                                        ),
                                       ),
-                                ),
-                              ),
-                            ),
-                          ],
+                                    ),
+                                  ],
+                                );
+                                break;
+                              default:
+                                return const Skeleton();
+                            }
+                          },
                         ),
                       ),
                     ],
@@ -228,8 +237,8 @@ class PersistHeaderWide extends StatelessWidget {
                 ),
                 Expanded(
                   flex: 3,
-                  child: StreamBuilder(
-                    stream: bloc.todayForecastStream,
+                  child: StreamBuilder<ConsolidatedWeather>(
+                    stream: forecastBloc.todayForecastStream,
                     builder: (context, snapshot) {
                       switch (snapshot.connectionState) {
                         case ConnectionState.active:
@@ -269,17 +278,17 @@ class PersistHeaderNarrow extends StatelessWidget {
   const PersistHeaderNarrow();
   @override
   Widget build(BuildContext context) {
-    print('PersistHeaderNarrow');
-    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    // print('PersistHeaderNarrow');
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    ForecastBloc forecastBloc = BlocProvider.of<ForecastBloc>(context);
 
-    return StreamBuilder(
-      stream: bloc.forecastStream,
+    return StreamBuilder<LocationClimate>(
+      stream: forecastBloc.forecastStream,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.active:
           case ConnectionState.done:
             LocationClimate climate = snapshot.data;
-
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
@@ -307,44 +316,58 @@ class PersistHeaderNarrow extends StatelessWidget {
                         ),
                         Flexible(
                           flex: 5,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: FittedBox(
-                                  alignment: Alignment.bottomLeft,
-                                  child: Text(
-                                    climate.title,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headline4
-                                        .copyWith(
-                                          color: Colors.white,
+                          child: StreamBuilder<ThemeData>(
+                            stream: prefBloc.themeStream,
+                            builder: (context, themeSnapshot) {
+                              switch (themeSnapshot.connectionState) {
+                                case ConnectionState.active:
+                                case ConnectionState.done:
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        flex: 3,
+                                        child: FittedBox(
+                                          alignment: Alignment.bottomLeft,
+                                          child: Text(
+                                            climate.title,
+                                            style: themeSnapshot
+                                                .data.textTheme.headline4
+                                                .copyWith(
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                         ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: FittedBox(
-                                  alignment: Alignment.topLeft,
-                                  child: Text(
-                                    DateFormat.yMd().format(
-                                        climate.time.add(climate.offset)),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        .copyWith(
-                                          color: Colors.white54,
-                                          fontWeight: FontWeight.w300,
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: FittedBox(
+                                          alignment: Alignment.topLeft,
+                                          child: Text(
+                                            (climate.time == null)
+                                                ? 'NaN'
+                                                : DateFormat.yMd().format(
+                                                    climate?.time
+                                                        ?.add(climate.offset)),
+                                            style: themeSnapshot
+                                                .data.textTheme.caption
+                                                .copyWith(
+                                              color: Colors.white54,
+                                              fontWeight: FontWeight.w300,
+                                            ),
+                                          ),
                                         ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                                      ),
+                                    ],
+                                  );
+                                  break;
+                                default:
+                                  return const Skeleton();
+                              }
+                            },
                           ),
                         ),
                       ],
@@ -353,8 +376,8 @@ class PersistHeaderNarrow extends StatelessWidget {
                 ),
                 Expanded(
                   flex: 2,
-                  child: StreamBuilder(
-                    stream: bloc.todayForecastStream,
+                  child: StreamBuilder<ConsolidatedWeather>(
+                    stream: forecastBloc.todayForecastStream,
                     builder: (context, snapshot) {
                       switch (snapshot.connectionState) {
                         case ConnectionState.active:
@@ -395,33 +418,44 @@ class PersistHeaderLastUpdate extends StatelessWidget {
   const PersistHeaderLastUpdate();
   @override
   Widget build(BuildContext context) {
-    print('PersistHeaderLastUpdate');
-    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
+    // print('PersistHeaderLastUpdate');
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    ForecastBloc forecastBloc = BlocProvider.of<ForecastBloc>(context);
 
-    return StreamBuilder<ConsolidatedWeather>(
-      stream: bloc.todayForecastStream,
-      builder: (context, climateSnapshot) {
-        switch (climateSnapshot.connectionState) {
+    return StreamBuilder<ThemeData>(
+      stream: prefBloc.themeStream,
+      builder: (context, themeSnapshot) {
+        switch (themeSnapshot.connectionState) {
           case ConnectionState.active:
           case ConnectionState.done:
-            DateTime time = climateSnapshot.data.created;
-            return SizedBox(
-              height: 24.0,
-              width: MediaQuery.of(context).size.width / 2,
-              child: FittedBox(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  'Updated ${_lastUpdate(time)}',
-                  style: Theme.of(context)
-                      .textTheme
-                      .overline
-                      .copyWith(color: Colors.white70),
-                ),
-              ),
+            return StreamBuilder<ConsolidatedWeather>(
+              stream: forecastBloc.todayForecastStream,
+              builder: (context, climateSnapshot) {
+                switch (climateSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    DateTime time = climateSnapshot.data.created;
+                    return SizedBox(
+                      height: 24.0,
+                      width: MediaQuery.of(context).size.width / 2,
+                      child: FittedBox(
+                        alignment: Alignment.bottomLeft,
+                        child: Text(
+                          'Updated ${_lastUpdate(time)}',
+                          style: themeSnapshot.data.textTheme.overline
+                              .copyWith(color: Colors.white70),
+                        ),
+                      ),
+                    );
+                    break;
+                  default:
+                    return Container();
+                }
+              },
             );
             break;
           default:
-            return Container();
+            return const Skeleton();
         }
       },
     );

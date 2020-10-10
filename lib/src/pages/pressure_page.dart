@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 class PressurePage extends StatelessWidget {
   static const String routeName = "/PressurePage";
+  const PressurePage();
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +13,7 @@ class PressurePage extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child:const CustomAppBar(title: 'Pressure')),
+          SliverToBoxAdapter(child: const CustomAppBar(title: 'Pressure')),
           SliverToBoxAdapter(
             child: ListView(
               shrinkWrap: true,

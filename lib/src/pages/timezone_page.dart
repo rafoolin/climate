@@ -9,8 +9,8 @@ class TimezonePage extends StatelessWidget {
   const TimezonePage();
   @override
   Widget build(BuildContext context) {
-    print('TimezonePage');
     PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -59,7 +59,7 @@ class LocationTimezoneTile extends StatelessWidget {
 
     return StreamBuilder<LocationClimate>(
       stream: bloc.forecastStream,
-      builder: (context, AsyncSnapshot<LocationClimate> snapshot) {
+      builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
           case ConnectionState.active:

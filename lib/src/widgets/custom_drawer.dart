@@ -8,7 +8,7 @@ class CustomDrawer extends StatelessWidget {
   const CustomDrawer();
   @override
   Widget build(BuildContext context) {
-    print('CustomDrawer');
+    // print('CustomDrawer');
     return Drawer(
       child: ListView(
         shrinkWrap: true,
@@ -17,30 +17,8 @@ class CustomDrawer extends StatelessWidget {
           const DrawerThemeTile(),
           const DrawerExpansionList(),
           const Divider(),
-          ListTileTheme(
-            child: ListTile(
-              title: Text('Setting'),
-              leading: Icon(FontAwesomeIcons.cog),
-              onTap: () =>
-                  Navigator.of(context).pushNamed(SettingsPage.routeName),
-            ),
-            iconColor: Theme.of(context).iconTheme.color,
-          ),
-          ListTileTheme(
-            child: CustomAboutDialog(
-              applicationIcon: SvgPicture.asset(
-                'assets/img/logo/daylight_logo.svg',
-                width: 50.0,
-                height: 50.0,
-              ),
-              applicationName: 'Climate',
-              applicationVersion: '1.0.0',
-              child: Text('About'),
-              icon: Icon(FontAwesomeIcons.infoCircle),
-              applicationLegalese: 'Climate is a simple weather app!',
-            ),
-            iconColor: Theme.of(context).iconTheme.color,
-          ),
+          const DrawerSettingTile(),
+          const DrawerAboutTile(),
         ],
       ),
     );
@@ -52,104 +30,36 @@ class CustomDrawerHeader extends StatelessWidget {
   const CustomDrawerHeader();
   @override
   Widget build(BuildContext context) {
-    print('CustomDrawerHeader');
-    ForecastBloc bloc = BlocProvider.of<ForecastBloc>(context);
-    return StreamBuilder(
-      stream: bloc.climateColorStream,
-      builder: (BuildContext context, AsyncSnapshot<Color> snapshot) {
-        switch (snapshot.connectionState) {
+    // print('CustomDrawerHeader');
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    ForecastBloc forecastBloc = BlocProvider.of<ForecastBloc>(context);
+    return StreamBuilder<ThemeData>(
+      stream: prefBloc.themeStream,
+      builder: (context, themeSnapshot) {
+        switch (themeSnapshot.connectionState) {
           case ConnectionState.active:
           case ConnectionState.done:
-            return DrawerHeader(
-              decoration: BoxDecoration(color: snapshot.data),
-              child: SvgPicture.asset(
-                Theme.of(context).brightness == Brightness.dark
-                    ? 'assets/img/logo/night_logo.svg'
-                    : 'assets/img/logo/daylight_logo.svg',
-                width: 100,
-                height: 100,
-              ),
-            );
-            break;
-          default:
-            return Container();
-        }
-      },
-    );
-  }
-}
-
-// ------------------------------ DrawerExpansionList ------------------------------
-class DrawerExpansionList extends StatelessWidget {
-  const DrawerExpansionList();
-  @override
-  Widget build(BuildContext context) {
-    print('DrawerExpansionList');
-    PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context)
-      ..fetchPlaces();
-    return StreamBuilder<List<String>>(
-      stream: bloc.placesStream,
-      builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.active:
-          case ConnectionState.done:
-            List<String> places = snapshot.data;
-
-            return ExpansionTile(
-              leading: Icon(FontAwesomeIcons.city),
-              maintainState: true,
-              title: Text('Locations'),
-              children: places.isEmpty
-                  ? [
-                      ListTileTheme(
-                        child: ListTile(
-                          title: Text('Add New Location'),
-                          leading: Icon(FontAwesomeIcons.plus),
-                          onTap: () => Navigator.of(context)
-                              .pushNamed(LocationPage.routeName),
-                        ),
-                        iconColor: Theme.of(context).iconTheme.color,
-                      )
-                    ]
-                  : places
-                      .map(
-                        (place) => DrawerPlaceTile(place: place),
-                      )
-                      .toList(),
-            );
-            break;
-          default:
-            return Container();
-        }
-      },
-    );
-  }
-}
-
-// -------------------------------- DrawerPlaceTile --------------------------------
-class DrawerPlaceTile extends StatelessWidget {
-  final String place;
-
-  const DrawerPlaceTile({Key key, @required this.place}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
-
-    return StreamBuilder(
-      stream: bloc.locationStream,
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.active:
-          case ConnectionState.done:
-            return ListTile(
-              title: Text(place, style: Theme.of(context).textTheme.subtitle1),
-              trailing: snapshot.data.compareTo(place) == 0
-                  ? Icon(
-                      Icons.my_location,
-                      color: Theme.of(context).accentColor,
-                    )
-                  : null,
-              onTap: () async => await bloc.saveLocation(location: place),
+            return StreamBuilder<Color>(
+              stream: forecastBloc.climateColorStream,
+              builder: (context, colorSnapshot) {
+                switch (colorSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    return DrawerHeader(
+                      decoration: BoxDecoration(color: colorSnapshot.data),
+                      child: SvgPicture.asset(
+                        themeSnapshot.data.brightness == Brightness.dark
+                            ? 'assets/img/logo/night_logo.svg'
+                            : 'assets/img/logo/daylight_logo.svg',
+                        width: 100,
+                        height: 100,
+                      ),
+                    );
+                    break;
+                  default:
+                    return Container();
+                }
+              },
             );
             break;
           default:
@@ -166,35 +76,269 @@ class DrawerThemeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('DrawerThemeTile');
-    PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
-    return StreamBuilder(
-      stream: bloc.themeStream,
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<bool> snapshot,
-      ) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.done:
+    // print('DrawerThemeTile');
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    ForecastBloc forecastBloc = BlocProvider.of<ForecastBloc>(context);
+    ThemeData theme;
+    bool isDark;
+    return StreamBuilder<ThemeData>(
+      stream: prefBloc.themeStream,
+      builder: (context, themeSnapshot) {
+        switch (themeSnapshot.connectionState) {
           case ConnectionState.active:
-            return ListTileTheme(
-              child: SwitchListTile(
-                activeColor: Theme.of(context).accentColor,
-                title: Text('Theme'),
-                secondary: snapshot.data
-                    ? Icon(FontAwesomeIcons.moon)
-                    : Icon(FontAwesomeIcons.solidSun),
-                value: snapshot.data,
-                onChanged: (value) async {
-                  await bloc.saveTheme(isDark: value);
-                },
-              ),
-              iconColor: Theme.of(context).iconTheme.color,
+          case ConnectionState.done:
+            theme = themeSnapshot.data;
+            isDark = theme.brightness == Brightness.dark;
+            return StreamBuilder<Color>(
+              stream: forecastBloc.climateColorStream,
+              builder: (context, colorSnapshot) {
+                switch (colorSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    return ListTileTheme(
+                      child: SwitchListTile(
+                        activeColor: colorSnapshot.data,
+                        title: Text('Theme'),
+                        secondary: isDark
+                            ? Icon(FontAwesomeIcons.moon)
+                            : Icon(FontAwesomeIcons.solidSun),
+                        value: isDark,
+                        onChanged: (value) async {
+                          await prefBloc.saveTheme(isDark: value);
+                        },
+                      ),
+                      iconColor: theme.iconTheme.color,
+                    );
+                    break;
+                  default:
+                    return Container();
+                }
+              },
             );
             break;
-          case ConnectionState.waiting:
           default:
-            return Center(child: CircularProgressIndicator());
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ------------------------------ DrawerExpansionList ------------------------------
+class DrawerExpansionList extends StatelessWidget {
+  const DrawerExpansionList();
+  @override
+  Widget build(BuildContext context) {
+    // print('DrawerExpansionList');
+    PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
+    List<String> places = [];
+    return StreamBuilder<List<String>>(
+      stream: bloc.placesStream,
+      builder: (BuildContext context, placesSnapshot) {
+        switch (placesSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            places = placesSnapshot.data;
+            return places.isEmpty
+                ? const DrawerEmptyLocation()
+                : DrawerPlacesTile(places: places);
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ------------------------------ DrawerEmptyLocation ------------------------------
+class DrawerEmptyLocation extends StatelessWidget {
+  const DrawerEmptyLocation();
+  @override
+  Widget build(BuildContext context) {
+    // print('DrawerEmptyLocation');
+    PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
+    return StreamBuilder<ThemeData>(
+      stream: bloc.themeStream,
+      builder: (context, themeSnapshot) {
+        switch (themeSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ExpansionTile(
+              leading: Icon(FontAwesomeIcons.city),
+              maintainState: true,
+              title: Text('Locations'),
+              children: [
+                ListTileTheme(
+                  child: ListTile(
+                    title: Text('Add New Location'),
+                    leading: Icon(FontAwesomeIcons.plus),
+                    onTap: () =>
+                        Navigator.of(context).pushNamed(LocationPage.routeName),
+                  ),
+                  iconColor: themeSnapshot.data.iconTheme.color,
+                )
+              ],
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ------------------------------- DrawerPlacesTile --------------------------------
+class DrawerPlacesTile extends StatelessWidget {
+  final List<String> places;
+  const DrawerPlacesTile({Key key, @required this.places}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    // print('DrawerPlacesTile');
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    ForecastBloc forecastBloc = BlocProvider.of<ForecastBloc>(context);
+    ThemeData theme;
+    Color color;
+
+    return StreamBuilder<ThemeData>(
+      stream: prefBloc.themeStream,
+      builder: (context, themeSnapshot) {
+        switch (themeSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            theme = themeSnapshot.data;
+            return StreamBuilder<String>(
+              stream: prefBloc.locationStream,
+              builder: (context, locationSnapshot) {
+                switch (locationSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    return StreamBuilder<Color>(
+                      stream: forecastBloc.climateColorStream,
+                      builder: (context, colorSnapshot) {
+                        switch (colorSnapshot.connectionState) {
+                          case ConnectionState.active:
+                          case ConnectionState.done:
+                            color = colorSnapshot.data;
+                            //TODO: Nothing yet?
+                            // Couldn't find any better solution to change
+                            // ExpansionTile's active color,
+                            // It seems like it only gets color from
+                            // "accentColor"
+                            return Theme(
+                              data: theme.copyWith(accentColor: color),
+                              child: ExpansionTile(
+                                leading: Icon(FontAwesomeIcons.city),
+                                maintainState: true,
+                                title: Text('Locations'),
+                                children: places
+                                    .map(
+                                      (place) => ListTile(
+                                        title: Text(
+                                          place,
+                                          style: theme.textTheme.subtitle1,
+                                        ),
+                                        trailing: locationSnapshot.data
+                                                    .compareTo(place) ==
+                                                0
+                                            ? Icon(
+                                                Icons.my_location,
+                                                color: color,
+                                              )
+                                            : null,
+                                        onTap: () async => await prefBloc
+                                            .saveLocation(location: place),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            );
+                            break;
+                          default:
+                            return Container();
+                        }
+                      },
+                    );
+                    break;
+                  default:
+                    return Container();
+                }
+              },
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// ------------------------------- DrawerSettingTile -------------------------------
+class DrawerSettingTile extends StatelessWidget {
+  const DrawerSettingTile();
+  @override
+  Widget build(BuildContext context) {
+    // print('DrawerSettingTile');
+    PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
+
+    return StreamBuilder<ThemeData>(
+      stream: bloc.themeStream,
+      builder: (context, themeSnapshot) {
+        switch (themeSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListTileTheme(
+              child: ListTile(
+                title: Text('Setting'),
+                leading: Icon(FontAwesomeIcons.cog),
+                onTap: () =>
+                    Navigator.of(context).pushNamed(SettingsPage.routeName),
+              ),
+              iconColor: themeSnapshot.data.iconTheme.color,
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// -------------------------------- DrawerAboutTile --------------------------------
+class DrawerAboutTile extends StatelessWidget {
+  const DrawerAboutTile();
+  @override
+  Widget build(BuildContext context) {
+    // print('DrawerAboutTile');
+    PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
+
+    return StreamBuilder<ThemeData>(
+      stream: bloc.themeStream,
+      builder: (context, themeSnapshot) {
+        switch (themeSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            return ListTileTheme(
+              child: CustomAboutDialog(
+                applicationIcon: SvgPicture.asset(
+                  'assets/img/logo/daylight_logo.svg',
+                  width: 50.0,
+                  height: 50.0,
+                ),
+                applicationName: 'Climate',
+                applicationVersion: '1.0.0',
+                child: Text('About'),
+                icon: Icon(FontAwesomeIcons.infoCircle),
+                applicationLegalese: 'Climate is a simple weather app!',
+              ),
+              iconColor: themeSnapshot.data.iconTheme.color,
+            );
+            break;
+          default:
+            return Container();
         }
       },
     );
@@ -222,7 +366,9 @@ class CustomAboutDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('About');
+    // print('CustomAboutDialog');
+    PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
+
     return ListTile(
       dense: dense,
       title: child ?? Text('About'),
@@ -263,19 +409,31 @@ class CustomAboutDialog extends StatelessWidget {
                   children: [
                     applicationIcon ?? Container(),
                     SizedBox(width: 24.0),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          applicationName ?? '',
-                          style: Theme.of(context).textTheme.headline5,
-                        ),
-                        Text(
-                          applicationVersion ?? '',
-                          style: Theme.of(context).textTheme.bodyText2,
-                        )
-                      ],
+                    StreamBuilder<ThemeData>(
+                      stream: bloc.themeStream,
+                      builder: (context, themeSnapshot) {
+                        switch (themeSnapshot.connectionState) {
+                          case ConnectionState.active:
+                          case ConnectionState.done:
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  applicationName ?? '',
+                                  style: themeSnapshot.data.textTheme.headline5,
+                                ),
+                                Text(
+                                  applicationVersion ?? '',
+                                  style: themeSnapshot.data.textTheme.bodyText2,
+                                )
+                              ],
+                            );
+                            break;
+                          default:
+                            return Container();
+                        }
+                      },
                     ),
                   ],
                 ),

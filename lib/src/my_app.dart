@@ -19,27 +19,19 @@ class MyApp extends StatelessWidget {
       ..fetchTemperature()
       ..fetchDistance()
       ..fetchPressure()
-      ..fetchWind();
+      ..fetchWind()
+      ..fetchPlaces();
     ForecastBloc forecastBloc = ForecastBloc(preferencesBloc: prefBloc);
     return BlocProvider(
       bloc: prefBloc,
       child: BlocProvider(
         bloc: forecastBloc,
-        child: StreamBuilder(
-          stream: forecastBloc.climateColorStream,
-          builder: (context, colorSnapshot) {
-            return StreamBuilder(
-              stream: prefBloc.themeStream,
-              builder: (context, snapshot) {
-                ThemeData theme = snapshot.hasData
-                    ? snapshot.data ? darkTheme : lightTheme
-                    : lightTheme;
-                return MaterialApp(
-                  // Color of accentColor matches the weather condition
-                  theme: theme.copyWith(accentColor: colorSnapshot.data),
-                  onGenerateRoute: _onGenerateRoute,
-                );
-              },
+        child: StreamBuilder<ThemeData>(
+          stream: prefBloc.themeStream,
+          builder: (context, themeSnapshot) {
+            return MaterialApp(
+              theme: themeSnapshot.data ?? lightTheme,
+              onGenerateRoute: _onGenerateRoute,
             );
           },
         ),
@@ -60,55 +52,55 @@ class MyApp extends StatelessWidget {
       // SettingsPage
       case SettingsPage.routeName:
         return MaterialPageRoute(
-          builder: (BuildContext context) => SettingsPage(),
+          builder: (BuildContext context) => const SettingsPage(),
         );
         break;
       // LocationPage
       case LocationPage.routeName:
         return MaterialPageRoute(
-          builder: (BuildContext context) => LocationPage(),
+          builder: (BuildContext context) => const LocationPage(),
         );
         break;
       // LocationConfigPage
       case LocationConfigPage.routeName:
         return MaterialPageRoute(
-          builder: (BuildContext context) => LocationConfigPage(),
+          builder: (BuildContext context) => const LocationConfigPage(),
         );
         break;
       // TempPage
       case TempPage.routeName:
         return MaterialPageRoute(
-          builder: (BuildContext context) => TempPage(),
+          builder: (BuildContext context) => const TempPage(),
         );
         break;
       // WindPage
       case WindPage.routeName:
         return MaterialPageRoute(
-          builder: (BuildContext context) => WindPage(),
+          builder: (BuildContext context) => const WindPage(),
         );
         break;
       // PressurePage
       case PressurePage.routeName:
         return MaterialPageRoute(
-          builder: (BuildContext context) => PressurePage(),
+          builder: (BuildContext context) => const PressurePage(),
         );
         break;
       // DistancePage
       case DistancePage.routeName:
         return MaterialPageRoute(
-          builder: (BuildContext context) => DistancePage(),
+          builder: (BuildContext context) => const DistancePage(),
         );
         break;
       // TimezonePage
       case TimezonePage.routeName:
         return MaterialPageRoute(
-          builder: (BuildContext context) => TimezonePage(),
+          builder: (BuildContext context) => const TimezonePage(),
         );
         break;
       // EmptyPage
       case EmptyPage.routeName:
         return MaterialPageRoute(
-          builder: (BuildContext context) => EmptyPage(),
+          builder: (BuildContext context) => const EmptyPage(),
         );
         break;
       // CustomLicensePage
@@ -135,7 +127,7 @@ class MyApp extends StatelessWidget {
       case SplashPage.routeName:
       default:
         return MaterialPageRoute(
-          builder: (BuildContext context) => SplashPage(),
+          builder: (BuildContext context) => const SplashPage(),
         );
     }
   }

@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 
 class TempPage extends StatelessWidget {
   static const String routeName = "/TempPage";
-
+  const TempPage();
   @override
   Widget build(BuildContext context) {
     PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child:const CustomAppBar(title: 'Temperature')),
+          SliverToBoxAdapter(child: const CustomAppBar(title: 'Temperature')),
           SliverToBoxAdapter(
             child: ListView(
               shrinkWrap: true,

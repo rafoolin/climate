@@ -14,6 +14,7 @@ This project is very simple and I did my best to add comments for almost every s
 - [x] Dark/Light Theme(Rxdart).
 - [x] Dynamic Theme based on the weather condition(Rxdart).
 - [x] Handle exceptions.(a very simple one)
+- [ ] Add a history page for forecasts on previous dates.
 
 # Build
 

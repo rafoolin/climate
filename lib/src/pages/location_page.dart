@@ -3,31 +3,14 @@ import 'package:climate/src/pages/pages.dart';
 import 'package:climate/src/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
-class LocationPage extends StatefulWidget {
+class LocationPage extends StatelessWidget {
   static const String routeName = "/LocationPage";
   const LocationPage({Key key}) : super(key: key);
-  @override
-  _LocationPageState createState() => _LocationPageState();
-}
-
-class _LocationPageState extends State<LocationPage> {
-  PreferencesBloc _preferencesBloc;
-  List<String> _places;
-  GlobalKey<ScaffoldState> _scaffoldKey;
-
-  @override
-  void initState() {
-    _preferencesBloc = BlocProvider.of<PreferencesBloc>(context)..fetchPlaces();
-    _scaffoldKey = GlobalKey();
-    _places = [];
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
-    print('location page');
+    // print('LocationPage');
     return Scaffold(
-      key: _scaffoldKey,
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -37,7 +20,7 @@ class _LocationPageState extends State<LocationPage> {
                 Tooltip(
                   message: 'Add new locations',
                   child: IconButton(
-                    icon: Icon(Icons.add, color: Colors.white),
+                    icon: const Icon(Icons.add, color: Colors.white),
                     onPressed: () => Navigator.of(context)
                         .pushNamed(LocationConfigPage.routeName),
                   ),
@@ -58,112 +41,135 @@ class _LocationPageState extends State<LocationPage> {
               ),
             ),
           ),
-          SliverToBoxAdapter(child: SizedBox(height: 24.0)),
-          _locationList(),
+          const SliverToBoxAdapter(child: const SizedBox(height: 24.0)),
+          const SliverToBoxAdapter(child: const LocationPagePlaces()),
         ],
-      ),
-    );
-  }
-
-  Widget _locationList() {
-    return StreamBuilder<List<String>>(
-      stream: _preferencesBloc.placesStream,
-      builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.active:
-          case ConnectionState.done:
-            _places = snapshot.data;
-            return SliverList(
-              delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => GestureDetector(
-                        onTap: () async =>
-                            // Change user fav location to the tapped one
-                            // then show a snackbar.
-                            await _preferencesBloc
-                                .saveLocation(location: _places[index])
-                                .then(
-                                  (value) => _scaffoldKey.currentState
-                                    ..hideCurrentSnackBar()
-                                    ..showSnackBar(_snackBar(_places[index])),
-                                ),
-                        child: DismissiblePlace(title: _places[index]),
-                      ),
-                  childCount: _places.length),
-            );
-            break;
-          case ConnectionState.waiting:
-          case ConnectionState.none:
-          default:
-            return SliverToBoxAdapter();
-        }
-      },
-    );
-  }
-
-  Widget _snackBar(String location) {
-    return SnackBar(
-      content: RichText(
-        text: TextSpan(
-          style: Theme.of(context).textTheme.button.copyWith(
-                fontSize: 12.0,
-                fontWeight: FontWeight.w200,
-              ),
-          text: 'Set ',
-          children: [
-            TextSpan(
-              text: '$location ',
-              style: TextStyle(
-                color: Color(0xffe4ce0f),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            TextSpan(text: 'as current location!')
-          ],
-        ),
       ),
     );
   }
 }
 
-class DismissiblePlace extends StatelessWidget {
-  final String title;
-  const DismissiblePlace({Key key, this.title}) : super(key: key);
+// ------------------------------- LocationPagePlaces -------------------------------
+class LocationPagePlaces extends StatelessWidget {
+  const LocationPagePlaces();
   @override
   Widget build(BuildContext context) {
-    print('DismissiblePlace');
-    PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
-    String currentLocation;
-    return StreamBuilder(
-      stream: bloc.locationStream,
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
+    // print('LocationPagePlaces');
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    List<String> places = [];
+
+    return StreamBuilder<List<String>>(
+      stream: prefBloc.placesStream,
+      builder: (BuildContext context, placesSnapshot) {
+        switch (placesSnapshot.connectionState) {
+          case ConnectionState.active:
+          case ConnectionState.done:
+            places = placesSnapshot.data;
+            return ListView.builder(
+              shrinkWrap: true,
+              itemCount: places.length,
+              itemBuilder: (context, index) {
+                return LocationPageTile(place: places[index]);
+              },
+            );
+            break;
+          default:
+            return Container();
+        }
+      },
+    );
+  }
+}
+
+// -------------------------------- LocationPageTile --------------------------------
+class LocationPageTile extends StatelessWidget {
+  final String place;
+
+  const LocationPageTile({Key key, this.place}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    // print('LocationPageTile');
+    PreferencesBloc prefBloc = BlocProvider.of<PreferencesBloc>(context);
+    ForecastBloc forecastBloc = BlocProvider.of<ForecastBloc>(context);
+
+    return StreamBuilder<String>(
+      stream: prefBloc.locationStream,
+      builder: (context, locationSnapshot) {
+        switch (locationSnapshot.connectionState) {
           case ConnectionState.done:
           case ConnectionState.active:
-            currentLocation = snapshot.data;
-            return Dismissible(
-              direction: DismissDirection.endToStart,
-              background: Container(
-                alignment: Alignment.centerRight,
-                color: Colors.red,
-                child: Icon(Icons.delete_sweep),
-              ),
-              key: ObjectKey(title),
-              child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 32.0),
-                title: Text(title),
-                trailing:
-                    // If the current saved location is same as title,
-                    // show a location icon beside the title.
-                    currentLocation.compareTo(title) == 0
-                        ? Icon(
-                            Icons.my_location,
-                            color: Theme.of(context).accentColor,
-                          )
-                        : null,
-              ),
-              onDismissed: (direction) async =>
-                  // If dismissed an location, remove it from saved places.
-                  await bloc.delPlace(title: title),
+            return StreamBuilder<Color>(
+              stream: forecastBloc.climateColorStream,
+              builder: (context, colorSnapshot) {
+                switch (colorSnapshot.connectionState) {
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    return Dismissible(
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        color: Colors.red,
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 16.0),
+                          child: Icon(Icons.delete_sweep),
+                        ),
+                      ),
+                      key: Key(place),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.symmetric(horizontal: 32.0),
+                        title: Text(place),
+                        trailing:
+                            // If the current saved location is same as title,
+                            // show a location icon beside the title.
+                            locationSnapshot.data.compareTo(place) == 0
+                                ? Icon(
+                                    Icons.my_location,
+                                    color: colorSnapshot.data,
+                                  )
+                                : null,
+                        onTap: () async =>
+                            await prefBloc.saveLocation(location: place).then(
+                                  (value) => Scaffold.of(context)
+                                    ..hideCurrentSnackBar()
+                                    ..showSnackBar(
+                                      SnackBar(
+                                        content: RichText(
+                                          text: TextSpan(
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .button
+                                                .copyWith(
+                                                  fontSize: 12.0,
+                                                  fontWeight: FontWeight.w200,
+                                                ),
+                                            text: 'Set ',
+                                            children: [
+                                              TextSpan(
+                                                text: '$place ',
+                                                style: TextStyle(
+                                                  color: Color(0xffe4ce0f),
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              const TextSpan(
+                                                text: 'as current location!',
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ),
+                      ),
+                      onDismissed: (direction) async =>
+                          // If dismissed an location, remove it from saved places.
+                          await prefBloc.delPlace(title: place),
+                    );
+                    break;
+                  default:
+                    return Container();
+                }
+              },
             );
             break;
           default:

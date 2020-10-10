@@ -23,21 +23,21 @@ class _CustomExpansionState extends State<CustomExpansion>
       vsync: this,
       duration: Duration(milliseconds: 500),
     );
-    // At least 3/4 child be presented then by clicking the
+    // At least 3 child should be presented then by clicking the
     // button it shows all the items.
     _size = Tween(
-            // At least 3/4
-            begin: 4 * widget.itemExtent,
+            // At least 3
+            begin: 3 * widget.itemExtent,
             // Add some spaces between button and last item
-            // +2 is for that reason.
-            end: widget.itemExtent * (widget.children.length + 2))
+            // +1 is for that reason.
+            end: widget.itemExtent * (widget.children.length + 1))
         .animate(_controller);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    print('CustomExpansion');
+    //
     return AnimatedBuilder(
       animation: _controller,
       child: Stack(
@@ -46,6 +46,7 @@ class _CustomExpansionState extends State<CustomExpansion>
             left: 16.0,
             right: 16.0,
             child: ListView.builder(
+              padding: EdgeInsets.zero,
               itemExtent: widget.itemExtent,
               physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
@@ -58,33 +59,36 @@ class _CustomExpansionState extends State<CustomExpansion>
             left: 0.0,
             right: 0.0,
             bottom: 0.0,
-            child: StreamBuilder(
+            child: StreamBuilder<ThemeData>(
               stream: _bloc.themeStream,
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.active:
                   case ConnectionState.done:
-                    return FlatButton(
-                      hoverColor: Colors.grey.shade200.withOpacity(.3),
-                      color: snapshot.data
-                          ? Colors.black26
-                          : Colors.grey.shade200.withOpacity(.35),
-                      onPressed: () {
-                        if (_controller.status == AnimationStatus.completed) {
-                          _isExpanded = false;
-                          _controller.reverse();
-                        } else if (_controller.status ==
-                            AnimationStatus.dismissed) {
-                          _isExpanded = true;
-                          _controller.forward();
-                        }
-                        setState(() {});
-                      },
-                      child: Icon(
-                        _isExpanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: Colors.grey,
+                    return ButtonTheme(
+                      height: widget.itemExtent,
+                      child: FlatButton(
+                        hoverColor: Colors.grey.shade200.withOpacity(.3),
+                        color: snapshot.data.brightness == Brightness.dark
+                            ? Colors.black26
+                            : Colors.grey.shade200.withOpacity(.35),
+                        onPressed: () {
+                          if (_controller.status == AnimationStatus.completed) {
+                            _isExpanded = false;
+                            _controller.reverse();
+                          } else if (_controller.status ==
+                              AnimationStatus.dismissed) {
+                            _isExpanded = true;
+                            _controller.forward();
+                          }
+                          setState(() {});
+                        },
+                        child: Icon(
+                          _isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          color: Colors.grey,
+                        ),
                       ),
                     );
                     break;

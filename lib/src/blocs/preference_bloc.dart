@@ -161,6 +161,7 @@ class PreferencesBloc extends Bloc {
   /// `current` is the current location key.
   ///
   /// `places` is the other places key.
+  //TODO: Isn't Used, delete it if is useless
   get currentLocationPlacesStream =>
       Rx.combineLatest2<List<String>, String, Map<String, dynamic>>(
         _places.stream,

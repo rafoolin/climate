@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 
 class WindPage extends StatelessWidget {
   static const String routeName = "/WindPage";
-
+  const WindPage();
   @override
   Widget build(BuildContext context) {
     PreferencesBloc bloc = BlocProvider.of<PreferencesBloc>(context);
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [

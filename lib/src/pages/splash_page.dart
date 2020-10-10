@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 class SplashPage extends StatefulWidget {
   static const String routeName = "/SplashPage";
+  const SplashPage();
 
   @override
   _SplashPageState createState() => _SplashPageState();
@@ -22,7 +23,8 @@ class _SplashPageState extends State<SplashPage>
       ..addStatusListener((status) async {
         if (status == AnimationStatus.completed) {
           Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (BuildContext context) => HomePage()),
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const HomePage()),
               (Route<dynamic> route) => false);
         }
       });
